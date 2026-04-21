@@ -28,7 +28,7 @@ class User(db.Model):
     password_hash: Mapped[str] = mapped_column(nullable=False)
     username: Mapped[str] = mapped_column(
         String(120), unique=True, nullable=False)
-    role: Mapped[Roles] = mapped_column(Enum(Roles), default=Roles.USER)
+    role: Mapped[Roles] = mapped_column(Enum(Roles, name="roles"), default=Roles.USER)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
@@ -70,7 +70,7 @@ class SongRequest(db.Model):
     artist_name: Mapped[str] = mapped_column(String(200), nullable=False)
     album_image: Mapped[str] = mapped_column(String(500), nullable=False)
     status: Mapped[SongStatus] = mapped_column(
-        Enum(SongStatus), default=SongStatus.PENDING)
+        Enum(SongStatus, name="song_status"), default=SongStatus.PENDING)
     reject_message: Mapped[str] = mapped_column(String(300), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
@@ -102,7 +102,8 @@ class SpotifyToken(db.Model):
     refresh_token: Mapped[str] = mapped_column(String(500), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+    expires_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=True)
 
     def serialize(self):
         return {
