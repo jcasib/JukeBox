@@ -1,0 +1,164 @@
+:root {
+  --background: #0f1724;
+  --foreground: #e6eef8;
+  --border: #00000020;
+  --input: #0b1220;
+  --primary: #ff6b35;
+  --primary-foreground: #0f1724;
+  --secondary: #19232c;
+  --secondary-foreground: #cfe8ff;
+  --muted: #0b1220;
+  --muted-foreground: #7e8a94;
+  --success: #10b981;
+  --success-foreground: #042018;
+  --accent: #ffd166;
+  --accent-foreground: #1b0f00;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --warning: #f59e0b;
+  --warning-foreground: #1b0f00;
+  --card: #0e1620;
+  --card-foreground: #e6eef8;
+  --sidebar: #071021;
+  --sidebar-foreground: #9fb7c9;
+  --sidebar-primary: #0f2a3a;
+  --sidebar-primary-foreground: #ffedd8;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --font-family-body: Syne;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-family-body), sans-serif;
+}
+
+/*-------------- BOTTOMS -------------- */
+.primary-bottom {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+.secondary-bottom {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+
+/*-------------- QUEUE CARD -------------- */
+.hero-card {
+  display: grid;
+  grid-template-columns: 72px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: var(--secondary);
+}
+#heroCover {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+}
+#heroTrackInfo {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+#heroTrackLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary);
+  white-space: nowrap;
+}
+#heroTrackTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--card-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#heroTrackArtist {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#heroTime {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+/*-------------- PLAYER CARD -------------- */
+#playerCard {
+  margin: 0;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-radius: 22px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+#playerCover {
+  width: 74px;
+  height: 74px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+#playerInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+#playerTitle {
+  font-size: 16px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#playerArtist {
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.95;
+}
+#playerBars {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/*-------------- TABLET/MOBILE NAVBAR -------------- */
+.sidebar.fixed-bottom {
+  border-top: 1px solid var(--clr-surface-a20) !important;
+  background-color: var(--sidebar);
+}
+
+.sidebar.fixed-bottom .nav {
+  align-items: center;
+}
+
+.sidebar.fixed-bottom .nav .btn {
+  color: var(--sidebar-foreground);
+}
+
+.sidebar.fixed-bottom .nav .btn.active {
+  color: var(--primary);
+}
