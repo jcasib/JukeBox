@@ -1,0 +1,43 @@
+import { NavLink } from "react-router-dom";
+
+export const MobileNavbar = () => {
+
+    return (
+        <nav className="sidebar fixed-bottom d-lg-none">
+            <div className="container-fluid">
+
+                <div className="nav d-flex justify-content-around w-100">
+                    {/* Home */}
+                    <NavLink to="/app" end className="btn text-center fs-1">
+                        <i className="bi bi-house-door"></i>
+                        <span className="d-block" style={{fontSize: "0.65rem"}}>Inicio</span>
+                    </NavLink>
+
+                    {/* Search */}
+                    <NavLink to="/app/groups" className="btn text-center fs-1">
+                        <i className="bi bi-search"></i>
+                        <span className="d-block" style={{fontSize: "0.65rem"}}>Buscar</span>
+                    </NavLink>
+
+                    {/* Request */}
+                    <NavLink to="/app/plans" className="btn text-center fs-1" >
+                        <i className="bi bi-music-note-list"></i>
+                        <span className="d-block" style={{fontSize: "0.65rem"}}>Peticiones</span>
+                    </NavLink>
+
+                    {/* Admin */}
+                    <NavLink to="/app/descubre" className="btn text-center fs-1">
+                        <i className="bi bi-shield-check"></i>
+                        <span className="d-block" style={{fontSize: "0.65rem"}}>Moderador</span>
+                    </NavLink>
+
+                    {/* Settings
+                    <NavLink to="/app/profile" className="btn text-center px-3">
+                        <i className="bi bi-gear"></i>
+                    </NavLink> */}
+
+                </div>
+            </div>
+        </nav>
+    );
+};
