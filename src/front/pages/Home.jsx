@@ -91,7 +91,7 @@ export const Home = () => {
 					})}
 				</>
 			) : (
-				<div id="playerCard" className="mb-3">No hay nada sonando en este momento</div>
+				<div id="playerCard" className="mb-3 d-flex justify-content-center">No hay nada sonando en este momento</div>
 			)}
 		</div>
 	);
