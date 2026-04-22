@@ -162,3 +162,20 @@ body {
 .sidebar.fixed-bottom .nav .btn.active {
   color: var(--primary);
 }
+
+/*-------------- SEARCH -------------- */
+#searchBar {
+  background: var(--secondary);
+  border-radius: 999px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted-foreground);
+  border: 1px solid var(--border);
+  font-size: 18px;
+}
+#searchBar::placeholder {
+  color: var(--foreground);
+  opacity: 0.7;
+}

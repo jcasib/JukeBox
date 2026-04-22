@@ -295,6 +295,70 @@ def spotify_queue():
 
     return jsonify({"queue": queue})
 
+@api.route('/public/top-tracks', methods=['GET'])
+def top_tracks():
+    token = get_spotify_token()
+    if not token:
+        return jsonify({"error": "Spotify not connected"}), 503
+
+    time_range = request.args.get("time_range", "medium_term")
+    limit = int(request.args.get("limit", 10))
+
+    response = requests.get(f"{SPOTIFY_API_URL}/me/top/tracks", headers={
+        "Authorization": f"Bearer {token}"
+    }, params={"time_range": time_range, "limit": limit})
+
+    return jsonify(response.json())
+
+@api.route('/public/top-artists', methods=['GET'])
+def top_artists():
+    token = get_spotify_token()
+    if not token:
+        return jsonify({"error": "Spotify not connected"}), 503
+
+    time_range = request.args.get("time_range", "medium_term")
+    limit = int(request.args.get("limit", 10))
+
+    response = requests.get(f"{SPOTIFY_API_URL}/me/top/artists", headers={
+        "Authorization": f"Bearer {token}"
+    }, params={"time_range": time_range, "limit": limit})
+
+    return jsonify(response.json())
+
+@api.route('/spotify/autocomplete', methods=['GET'])
+def spotify_autocomplete():
+    q = request.args.get("q", "").strip()
+    if len(q) < 2:
+        return jsonify([])
+    
+    token = get_spotify_token()
+    if not token:
+        return jsonify([]), 503
+
+    response = requests.get(f"{SPOTIFY_API_URL}/search", headers={
+        "Authorization": f"Bearer {token}"
+    }, params={"q": q, "type": "track,artist", "limit": 5})
+
+    data = response.json()
+    suggestions = []
+
+    for track in data.get("tracks", {}).get("items", []):
+        suggestions.append({
+            "type": "track",
+            "label": f"{track['name']} — {track['artists'][0]['name']}",
+            "query": track["name"]
+        })
+
+    for artist in data.get("artists", {}).get("items", []):
+        suggestions.append({
+            "type": "artist",
+            "label": artist["name"],
+            "query": artist["name"]
+        })
+
+    return jsonify(suggestions[:6])
+
+
 # — ADMIN ————————————————————————————————————————————————————————————————————
 
 
