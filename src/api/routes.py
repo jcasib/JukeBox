@@ -295,6 +295,35 @@ def spotify_queue():
 
     return jsonify({"queue": queue})
 
+@api.route('/public/recently-played', methods=['GET'])
+def recently_played():
+    token = get_spotify_token()
+    if not token:
+        return jsonify({"error": "Spotify not connected"}), 503
+
+    limit = int(request.args.get("limit", 20))
+
+    response = requests.get(f"{SPOTIFY_API_URL}/me/player/recently-played", headers={
+        "Authorization": f"Bearer {token}"
+    }, params={"limit": limit})
+
+    if response.status_code != 200:
+        return jsonify({"tracks": []})
+
+    data = response.json()
+    tracks = []
+    for item in data.get("items", []):
+        track = item.get("track", {})
+        tracks.append({
+            "track_name": track.get("name"),
+            "artist_name": ", ".join(a["name"] for a in track.get("artists", [])),
+            "album_image": track["album"]["images"][1]["url"] if track.get("album", {}).get("images") else None,
+            "played_at": item.get("played_at"),
+            "track_id": track.get("id"),
+        })
+
+    return jsonify({"tracks": tracks})
+
 @api.route('/public/top-tracks', methods=['GET'])
 def top_tracks():
     token = get_spotify_token()
