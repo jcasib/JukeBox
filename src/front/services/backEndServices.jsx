@@ -116,3 +116,15 @@ export const createRequest = async (track, token) => {
         return { error: "Request failed" };
     }
 };
+
+export const fetchMyRequests = async (token) => {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/requests/my`, {
+            headers: { Authorization: token }
+        });
+        return await response.json();
+    } catch (error) {
+        console.error("Error fetching my requests:", error);
+        return [];
+    }
+};

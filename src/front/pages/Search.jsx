@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { fetchTopArtists, fetchTopTracks, searchTracks, createRequest } from "../services/backEndServices"
+import { fetchTopArtists, fetchTopTracks, searchTracks, createRequest, fetchMyRequests } from "../services/backEndServices"
 
 export const Search = () => {
 
@@ -7,7 +7,7 @@ export const Search = () => {
     const [loading, setLoading] = useState(false)
     const [feedback, setFeedback] = useState(null)
 
-    const[requestingId, setRequestingId] = useState(null)
+    const [requestingId, setRequestingId] = useState(null)
     const [requestedIds, setRequestedIds] = useState([])
 
     const [results, setResults] = useState([])
@@ -15,6 +15,15 @@ export const Search = () => {
     const [topTracks, setTopTracks] = useState([]);
     const [topArtists, setTopArtists] = useState([]);
     const [topsLoading, setTopsLoading] = useState(true);
+
+    const handleRequest = async (track) => {
+        const token = localStorage.getItem("token")
+        if (!token) return
+        setRequestingId(track.id)
+        await createRequest(track, token)
+        setRequestedIds(prev => [...prev, track.id])
+        setRequestingId(null)
+    }
 
     useEffect(() => {
         const loadTops = async () => {
@@ -83,8 +92,17 @@ export const Search = () => {
                                     <div id="topSongTrackTitle">{track.name}</div>
                                     <div id="topSongTrackArtist">{track.artists.map(a => a.name).join(", ")}</div>
                                 </div>
-                                <button className="btn btn-sm primary-bottom">
-                                    <i className="bi bi-plus-lg" />
+                                <button
+                                    className="btn btn-sm primary-bottom"
+                                    onClick={() => handleRequest(track)}
+                                    disabled={requestingId === track.id || requestedIds.includes(track.id)}
+                                >
+                                    {requestingId === track.id
+                                        ? <div className="spinner-border spinner-border-sm" role="status" />
+                                        : requestedIds.includes(track.id)
+                                            ? <i className="bi bi-check-lg" />
+                                            : <i className="bi bi-plus-lg" />
+                                    }
                                 </button>
                             </div>
                         ))
@@ -111,8 +129,17 @@ export const Search = () => {
                                 <div id="topSongTrackTitle">{track?.name}</div>
                                 <div id="topSongTrackArtist">{track.artists.map(a => a.name).join(", ")}</div>
                             </div>
-                            <button className="btn btn-sm primary-bottom">
-                                <i className="bi bi-plus-lg" />
+                            <button
+                                className="btn btn-sm primary-bottom"
+                                onClick={() => handleRequest(track)}
+                                disabled={requestingId === track.id || requestedIds.includes(track.id)}
+                            >
+                                {requestingId === track.id
+                                    ? <div className="spinner-border spinner-border-sm" role="status" />
+                                    : requestedIds.includes(track.id)
+                                        ? <i className="bi bi-check-lg" />
+                                        : <i className="bi bi-plus-lg" />
+                                }
                             </button>
                         </div>
                     ))
