@@ -1,18 +1,29 @@
 import { useEffect, useState } from "react"
+import { fetchTopArtists, fetchTopTracks } from "../services/backEndServices"
 
 export const Search = () => {
 
     const [query, setQuery] = useState("")
     const [loading, setLoading] = useState(false)
     const [feedback, setFeedback] = useState(null)
-    const [topsLoading, setTopsLoading]   = useState(true)
+    const [topTracks, setTopTracks] = useState([]);
+    const [topArtists, setTopArtists] = useState([]);
+    const [topsLoading, setTopsLoading] = useState(true);
 
     useEffect(() => {
-        setTopsLoading(true)
-        const [tracks, artist] = await Promise.all([
-            fetch
-        ])
-    })
+        const loadTops = async () => {
+            setTopsLoading(true)
+            const [tracks, artists] = await Promise.all([
+                fetchTopTracks("medium_term"),
+                fetchTopArtists("medium_term")
+            ])
+            setTopTracks(tracks?.items || [])
+            setTopArtists(artists?.items || [])
+            setTopsLoading(false)
+            console.log(tracks)
+        }
+        loadTops()
+    }, [])
 
     return (
         <div className="container-fluid">
@@ -28,8 +39,31 @@ export const Search = () => {
                 </form>
             </div>
             {/* TOPS */}
-            <div>
-                
+            <div className="mb-4">
+                <h6 className="fw-bold mb-3">Canciones más sonadas</h6>
+                {topsLoading ? (
+                    <div className="text-center py-3">
+                        <div className="spinner-border spinner-border-sm" role="status" />
+                    </div>
+                ) : (
+                    topTracks.map((track, index) => (
+                        <div id="topSong-card" className="mb-1" key={index}>
+                            <img
+                                id="topSongCover"
+                                src={track.album?.images?.[2]?.url || track.album?.images?.[0]?.url}
+                                alt={track.name}
+                            />
+                            <div id="topSongTrackInfo">
+                                <div id="topSongTrackTitle">{track?.name}</div>
+                                <div id="topSongTrackArtist">{track.artists.map(a => a.name).join(", ")}</div>
+                            </div>
+                            <button className="btn btn-sm primary-bottom">
+                                <i className="bi bi-plus-lg" />
+                            </button>
+                        </div>
+                    ))
+                )}
+
             </div>
         </div>
     )

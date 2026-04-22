@@ -8,25 +8,25 @@ export const MobileNavbar = () => {
 
                 <div className="nav d-flex justify-content-around w-100">
                     {/* Home */}
-                    <NavLink to="/app" end className="btn text-center fs-1">
+                    <NavLink to="/" end className="btn text-center fs-2">
                         <i className="bi bi-house-door"></i>
                         <span className="d-block" style={{fontSize: "0.65rem"}}>Inicio</span>
                     </NavLink>
 
                     {/* Search */}
-                    <NavLink to="/app/groups" className="btn text-center fs-1">
+                    <NavLink to="/search" className="btn text-center fs-2">
                         <i className="bi bi-search"></i>
                         <span className="d-block" style={{fontSize: "0.65rem"}}>Buscar</span>
                     </NavLink>
 
                     {/* Request */}
-                    <NavLink to="/app/plans" className="btn text-center fs-1" >
+                    <NavLink to="/app/plans" className="btn text-center fs-2" >
                         <i className="bi bi-music-note-list"></i>
                         <span className="d-block" style={{fontSize: "0.65rem"}}>Peticiones</span>
                     </NavLink>
 
                     {/* Admin */}
-                    <NavLink to="/app/descubre" className="btn text-center fs-1">
+                    <NavLink to="/app/descubre" className="btn text-center fs-2">
                         <i className="bi bi-shield-check"></i>
                         <span className="d-block" style={{fontSize: "0.65rem"}}>Moderador</span>
                     </NavLink>
