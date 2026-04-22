@@ -377,7 +377,8 @@ def spotify_login():
         "user-read-playback-state",
         "user-modify-playback-state",
         "user-read-currently-playing",
-        "user-top-read"
+        "user-top-read",
+        "user-read-recently-played"
     ])
     params = {
         "client_id": SPOTIFY_CLIENT_ID,

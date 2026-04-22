@@ -63,7 +63,29 @@ export const Search = () => {
                         </div>
                     ))
                 )}
-
+            </div>
+            <div>
+                <h6 className="fw-bold mb-3">Artistas más frecuentes</h6>
+                {topsLoading ? (
+                    <div className="text-center py-3">
+                        <div className="spinner-border spinner-border-sm" role="status" />
+                    </div>
+                ) : (
+                    <div className="row">
+                        {topArtists.map(artist => (
+                            <div className="col-3 mb-2" key={artist.id}>
+                                <div className="ratio ratio-1x1">
+                                    <img
+                                        className="img-fluid rounded-circle object-fit-cover"
+                                        src={artist.images?.[2]?.url || artist.images?.[0]?.url}
+                                        alt={artist.name}
+                                    />
+                                </div>
+                                <div className="text-center" style={{fontSize:"10px"}}>{artist.name}</div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     )
