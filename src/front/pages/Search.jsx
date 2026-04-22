@@ -26,6 +26,17 @@ export const Search = () => {
     }
 
     useEffect(() => {
+        const token = localStorage.getItem("token")
+        if (!token) return
+        fetchMyRequests(token).then(data => {
+            console.log("my requests:", data)
+            if (!Array.isArray(data)) return
+            const ids = data.map(r => r.track_id)
+            setRequestedIds(ids)
+        })
+    }, [])
+
+    useEffect(() => {
         const loadTops = async () => {
             setTopsLoading(true)
             const [tracks, artists] = await Promise.all([

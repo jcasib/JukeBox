@@ -120,7 +120,7 @@ export const createRequest = async (track, token) => {
 export const fetchMyRequests = async (token) => {
     try {
         const response = await fetch(`${BACKEND_URL}/api/requests/my`, {
-            headers: { Authorization: token }
+            headers: { Authorization: `Bearer ${token}` }
         });
         return await response.json();
     } catch (error) {

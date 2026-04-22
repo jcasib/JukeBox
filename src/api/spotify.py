@@ -6,6 +6,7 @@ SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token"
 
+
 def refresh_spotify_token():
     from api.models import db, SpotifyToken
 
@@ -25,7 +26,8 @@ def refresh_spotify_token():
         record.expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
         db.session.commit()
         return new_token
-    
+
+
 def get_spotify_token():
     from api.models import SpotifyToken
     record = SpotifyToken.query.first()
