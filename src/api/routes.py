@@ -112,7 +112,6 @@ def get_user():
 
 
 @api.route('/spotify/search', methods=['GET'])
-@jwt_required()
 def spotify_search():
     q = request.args.get("q", "")
     limit = int(request.args.get("limit", 10))
