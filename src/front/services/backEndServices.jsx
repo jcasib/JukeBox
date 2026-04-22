@@ -26,6 +26,22 @@ export const fetchSpotifyQueue = async () => {
     }
 }
 
+export const fetchRecentlyPlayed = async (limit = 20) => {
+    try {
+        const response = await fetch(
+            `${BACKEND_URL}/api/public/recently-played?limit=${limit}`
+        );
+        const data = await response.json();
+        if (!response.ok) {
+            return { tracks: [] };
+        }
+        return data;
+    } catch (error) {
+        console.error("Error fetching recently played:", error);
+        return { tracks: [] };
+    }
+};
+
 export const fetchTopTracks = async (timeRange = "medium_term", limit = 10) => {
     try {
         const response = await fetch(

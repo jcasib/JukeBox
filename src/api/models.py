@@ -111,3 +111,21 @@ class SpotifyToken(db.Model):
             "updated_at": self.updated_at.isoformat(),
             "expires_at": self.expires_at.isoformat()
         }
+    
+class RecentlyPlayed(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    track_id: Mapped[str] = mapped_column(String(100), nullable=False)
+    track_name: Mapped[str] = mapped_column(String(200), nullable=False)
+    artist_name: Mapped[str] = mapped_column(String(200), nullable=False)
+    album_image: Mapped[str] = mapped_column(String(500), nullable=True)
+    played_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+    def serialize(self):
+        return {
+            "track_id": self.track_id,
+            "track_name": self.track_name,
+            "artist_name": self.artist_name,
+            "album_image": self.album_image,
+            "played_at": self.played_at.isoformat()
+        }

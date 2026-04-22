@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint, redirect
-from api.models import db, User, SongRequest, SongStatus, Roles, SpotifyToken
+from api.models import db, User, SongRequest, SongStatus, Roles, SpotifyToken, RecentlyPlayed
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
@@ -297,32 +297,8 @@ def spotify_queue():
 
 @api.route('/public/recently-played', methods=['GET'])
 def recently_played():
-    token = get_spotify_token()
-    if not token:
-        return jsonify({"error": "Spotify not connected"}), 503
-
-    limit = int(request.args.get("limit", 20))
-
-    response = requests.get(f"{SPOTIFY_API_URL}/me/player/recently-played", headers={
-        "Authorization": f"Bearer {token}"
-    }, params={"limit": limit})
-
-    if response.status_code != 200:
-        return jsonify({"tracks": []})
-
-    data = response.json()
-    tracks = []
-    for item in data.get("items", []):
-        track = item.get("track", {})
-        tracks.append({
-            "track_name": track.get("name"),
-            "artist_name": ", ".join(a["name"] for a in track.get("artists", [])),
-            "album_image": track["album"]["images"][1]["url"] if track.get("album", {}).get("images") else None,
-            "played_at": item.get("played_at"),
-            "track_id": track.get("id"),
-        })
-
-    return jsonify({"tracks": tracks})
+    tracks = RecentlyPlayed.query.order_by(RecentlyPlayed.played_at.desc()).limit(20).all()
+    return jsonify({"tracks": [t.serialize() for t in tracks]})
 
 @api.route('/public/top-tracks', methods=['GET'])
 def top_tracks():

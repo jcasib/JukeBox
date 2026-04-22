@@ -44,7 +44,7 @@ MIGRATE = Migrate(app, db, compare_type=True)
 db.init_app(app)
 
 with app.app_context():
-    start_scheduler()
+    start_scheduler(app)
 
 atexit.register(lambda: scheduler.shutdown())
 
