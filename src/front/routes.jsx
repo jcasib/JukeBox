@@ -8,6 +8,7 @@ import {
 import { Layout } from "./pages/Layout";
 import { Home } from "./pages/Home";
 import { Search } from "./pages/Search";
+import { Requests } from "./pages/Requests";
 
 export const router = createBrowserRouter(
     createRoutesFromElements(
@@ -23,6 +24,7 @@ export const router = createBrowserRouter(
         {/* Nested Routes: Defines sub-routes within the BaseHome component. */}
         <Route path= "/" element={<Home />} />
         <Route path= "/search" element={<Search />} />
+        <Route path= "/requests" element={<Requests />} />
       </Route>
     )
 );

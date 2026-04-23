@@ -128,3 +128,16 @@ export const fetchMyRequests = async (token) => {
         return [];
     }
 };
+
+export const deleteRequest = async (id, token) => {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/requests/${id}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return await response.json();
+    } catch (error) {
+        console.error("Error deleting request:", error);
+        return { error: "Delete failed" };
+    }
+};

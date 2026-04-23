@@ -218,3 +218,77 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/*-------------- REQUEST CARD -------------- */
+.request-card {
+  display: grid;
+  grid-template-columns: 50px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  border-radius: var(--radius-md);
+  background: var(--secondary);
+}
+.request-cover {
+  width: 50px;
+  height: 50px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+}
+.request-track-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.request-track-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--card-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.request-track-artist {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.request-reject-msg {
+  font-size: 11px;
+  color: var(--destructive);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.badge-pending {
+  background: var(--warning);
+  color: var(--warning-foreground);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge-accepted {
+  background: var(--success);
+  color: var(--success-foreground);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge-rejected {
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}

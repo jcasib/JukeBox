@@ -20,7 +20,7 @@ export const MobileNavbar = () => {
                     </NavLink>
 
                     {/* Request */}
-                    <NavLink to="/app/plans" className="btn text-center fs-2" >
+                    <NavLink to="/requests" className="btn text-center fs-2" >
                         <i className="bi bi-music-note-list"></i>
                         <span className="d-block" style={{fontSize: "0.65rem"}}>Peticiones</span>
                     </NavLink>
