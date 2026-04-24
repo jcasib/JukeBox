@@ -1,33 +1,25 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
-import { getUser } from "../../services/backEndServices";
+import { getRole } from "../../services/backEndServices";
 
 export const MobileNavbar = () => {
 
-    const [user, setUser] = useState(null)
     const [authorized, setAuthorized] = useState(false)
-    const checkToken = async () => {
-        const response = await getUser()
-        if (response) {
-            setUser(response)
-        }
-        else {
-            localStorage.removeItem("token")
-        }
-    }
 
-    useEffect(() => {
-        checkToken()
-    },[user])
-
-    useEffect(() => {
-        if (!user) return
-        if (user.role === "mod" || user.role === "admin") {
+    const checkRole = async () => {
+        const role = await getRole()
+        if (role === "mod" || role === "admin") {
             setAuthorized(true)
         } else {
             setAuthorized(false)
         }
-    },[user])
+    }
+
+    useEffect(() => {
+        checkRole()
+        const id = setInterval(checkRole, 30000)
+        return () => clearInterval(id)
+    }, [])
 
     return (
         <nav className="sidebar fixed-bottom d-lg-none">

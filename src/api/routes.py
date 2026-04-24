@@ -108,6 +108,15 @@ def get_user():
         return jsonify({"error": "User not found"}), 404
     return jsonify(user.serialize()), 200
 
+@api.route('/me/role', methods=['GET'])
+@jwt_required()
+def get_role():
+    user_id = int(get_jwt_identity())
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    return jsonify({"role": user.role.value}), 200
+
 # — Spotify Search ————————————————————————————————————————————————————————
 
 

@@ -201,3 +201,18 @@ export const getUser = async () => {
         return null;
     }
 }
+
+export const getRole = async () => {
+    try {
+        const token = localStorage.getItem("token")
+        if (!token) return null
+        const response = await fetch(`${BACKEND_URL}/api/me/role`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await response.json()
+        if (!response.ok) return null
+        return data.role
+    } catch (error) {
+        return null
+    }
+}
