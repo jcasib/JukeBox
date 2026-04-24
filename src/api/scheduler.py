@@ -48,7 +48,8 @@ def track_now_playing(app):
             track_id=track_id,
             track_name=track.get("name"),
             artist_name=", ".join(a["name"] for a in track.get("artists", [])),
-            album_image=track["album"]["images"][0]["url"] if track.get("album", {}).get("images") else None,
+            album_image=track["album"]["images"][0]["url"] if track.get(
+                "album", {}).get("images") else None,
             played_at=datetime.now(timezone.utc)
         )
 
@@ -57,12 +58,21 @@ def track_now_playing(app):
 
         total = db.session.query(RecentlyPlayed).count()
         if total > 20:
-            oldest = db.session.query(RecentlyPlayed).order_by(RecentlyPlayed.played_at.asc()).limit(total - 20).all()
+            oldest = db.session.query(RecentlyPlayed).order_by(
+                RecentlyPlayed.played_at.asc()).limit(total - 20).all()
             for entry in oldest:
                 db.session.delete(entry)
 
         db.session.commit()
         print(f"🎵 Nueva canción guardada: {new_entry.track_name}")
+
+
+def clear_old_requests(app):
+    with app.app_context():
+        from api.models import db, SongRequest
+        deleted = db.session.query(SongRequest).delete()
+        db.session.commit()
+        print(f"🗑️ {deleted} peticiones eliminadas")
 
 
 def start_scheduler(app):
@@ -84,6 +94,15 @@ def start_scheduler(app):
             trigger="interval",
             seconds=15,
             id="track_now_playing",
+            replace_existing=True
+        )
+        scheduler.add_job(
+            func=clear_old_requests,
+            args=[app],
+            trigger="cron",
+            hour=10,
+            minute=0,
+            id="clear_old_requests",
             replace_existing=True
         )
         scheduler.start()
