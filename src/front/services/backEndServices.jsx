@@ -141,3 +141,63 @@ export const deleteRequest = async (id, token) => {
         return { error: "Delete failed" };
     }
 };
+
+export const fetchPendingRequests = async (token) => {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/moderator/requests`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return await response.json();
+    } catch (error) {
+        console.error("Error fetching pending requests:", error);
+        return [];
+    }
+};
+
+export const acceptRequest = async (id, token) => {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/moderator/requests/${id}/accept`, {
+            method: "PUT",
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return await response.json();
+    } catch (error) {
+        console.error("Error accepting request:", error);
+        return { error: "Accept failed" };
+    }
+};
+
+export const rejectRequest = async (id, message, token) => {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/moderator/requests/${id}/reject`, {
+            method: "PUT",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ message })
+        });
+        return await response.json();
+    } catch (error) {
+        console.error("Error rejecting request:", error);
+        return { error: "Reject failed" };
+    }
+};
+
+export const getUser = async () => {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/get_user`, {
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("token")}`
+            }
+        });
+        const data = await response.json()
+        if (!response.ok) {
+            return false;
+        }
+        return data;
+    } catch (error) {
+        console.error("Error fetching user:", error);
+        return null;
+    }
+}

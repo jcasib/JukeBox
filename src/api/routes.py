@@ -179,7 +179,7 @@ def delete_request(req_id):
 def require_mod():
     user_id = int(get_jwt_identity())
     user = db.session.get(User, user_id)
-    if not user or user.role not in (Roles.MOD.value, Roles.ADMIN.value):
+    if not user or user.role not in (Roles.MOD, Roles.ADMIN):
         return None, (jsonify({"error": "Access denied"}), 403)
     return user, None
 
@@ -369,7 +369,7 @@ def spotify_autocomplete():
 def require_admin():
     user_id = int(get_jwt_identity())
     user = db.session.get(User, user_id)
-    if not user or user.role != Roles.ADMIN.value:
+    if not user or user.role != Roles.ADMIN:
         return None, (jsonify({"error": "Access denied"}), 403)
     return user, None
 
