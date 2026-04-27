@@ -34,15 +34,16 @@ export const Search = () => {
         }
 
         setRequestingId(track.id)
-        await createRequest(track, token)
+        const result = await createRequest(track, token)
+
+        if (result?.error === "rate_limit") {
+            setAlertModal({ msg: "Has hecho demasiadas peticiones, espera un momento", icon: "bi-exclamation-circle" })
+            setRequestingId(null)
+            return
+        }
+
         setRequestedIds(prev => [...prev, track.id])
         setRequestingId(null)
-    }
-
-    const getTrackAlert = (trackId, trackName) => {
-        if (queue.some(q => q.track_name === trackName)) return { msg: "Ya está en la cola", icon: "bi-collection-play", color: "var(--warning)" }
-        if (recentlyPlayed.some(r => r.track_id === trackId)) return { msg: "Ha sonado recientemente", icon: "bi-clock-history", color: "var(--muted-foreground)" }
-        return null
     }
 
     useEffect(() => {
@@ -105,6 +106,10 @@ export const Search = () => {
                         onChange={(e) => setQuery(e.target.value)}
                     ></input>
                 </form>
+            </div>
+            <div className="mb-3 px-1" style={{ fontSize: "13px", color: "var(--muted-foreground)" }}>
+                <i className="bi bi-info-circle me-1" />
+                Puedes pedir un máximo de 20 canciones por hora
             </div>
 
             {query.trim().length >= 2 && (

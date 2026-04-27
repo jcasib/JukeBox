@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { acceptRequest, rejectRequest, fetchPendingRequests, getRole } from "../services/backEndServices"
+import useGlobalReducer from "../hooks/useGlobalReducer"
 
 export const Moderator = () => {
     const [requests, setRequests] = useState([])
@@ -8,6 +9,8 @@ export const Moderator = () => {
     const [rejectingId, setRejectingId] = useState(null)
     const [rejectMessage, setRejectMessage] = useState("")
     const [processingId, setProcessingId] = useState(null)
+
+    const { store, dispatch } = useGlobalReducer()
 
     const formatTime = (isoString) => {
         const diff = Math.floor((new Date() - new Date(isoString)) / 1000)
@@ -58,11 +61,20 @@ export const Moderator = () => {
         return () => es.close()
     }, [authorized])
 
+    const refreshCount = async () => {
+        const token = localStorage.getItem("token")
+        const data = await fetchPendingRequests(token)
+        if (Array.isArray(data)) {
+            dispatch({ type: 'set_pending_count', payload: data.length })
+        }
+    }
+
     const handleAccept = async (id) => {
         const token = localStorage.getItem("token")
         setProcessingId(id)
         await acceptRequest(id, token)
         setRequests(prev => prev.filter(r => r.id !== id))
+        refreshCount()  // 👈
         setProcessingId(null)
     }
 
@@ -74,6 +86,7 @@ export const Moderator = () => {
         setRejectingId(null)
         setRejectMessage("")
         setProcessingId(null)
+        refreshCount()  // 👈
     }
 
     if (loading) return (

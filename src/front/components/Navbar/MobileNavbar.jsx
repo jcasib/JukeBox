@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { getRole } from "../../services/backEndServices";
+import useGlobalReducer from "../../hooks/useGlobalReducer";
 
 export const MobileNavbar = () => {
 
+    const { store, dispatch } = useGlobalReducer()
     const [authorized, setAuthorized] = useState(false)
+    const [pendingCount, setPendingCount] = useState(0)
 
     const checkRole = async () => {
         const role = await getRole()
@@ -20,6 +23,34 @@ export const MobileNavbar = () => {
         const id = setInterval(checkRole, 30000)
         return () => clearInterval(id)
     }, [])
+
+    useEffect(() => {
+        if (!authorized) return
+
+        const token = localStorage.getItem("token")
+
+        // Carga inicial del contador
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/moderator/requests`, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+            .then(r => r.json())
+            .then(data => {
+                if (Array.isArray(data)) dispatch({ type: 'set_pending_count', payload: data.length })
+            })
+
+        // SSE — incrementa cuando llega nueva petición
+        const es = new EventSource(`${import.meta.env.VITE_BACKEND_URL}/api/moderator/events?token=${token}`)
+
+        es.onmessage = (e) => {
+            const event = JSON.parse(e.data)
+            if (event.type === "connected") return
+            dispatch({ type: 'set_pending_count', payload: store.pendingCount + 1 })
+        }
+
+        es.onerror = () => es.close()
+
+        return () => es.close()
+    }, [authorized])
 
     return (
         <nav className="sidebar fixed-bottom d-lg-none">
@@ -44,11 +75,20 @@ export const MobileNavbar = () => {
                         <span className="d-block" style={{ fontSize: "0.65rem" }}>Peticiones</span>
                     </NavLink>
 
-                    {/* Admin */}
-                    {authorized && <NavLink to="/mod" className="btn text-center fs-2">
-                        <i className="bi bi-shield-check"></i>
-                        <span className="d-block" style={{ fontSize: "0.65rem" }}>Moderador</span>
-                    </NavLink>}
+                    {/* MOD */}
+                    {authorized && (
+                        <NavLink to="/mod" className="btn text-center fs-2" style={{ position: "relative" }}>
+                            <i className="bi bi-shield-check"></i>
+                            {store.pendingCount > 0 && (
+                                <span style={{
+                                    position: "absolute", top: "4px", right: "4px",
+                                    width: "10px", height: "10px",
+                                    borderRadius: "50%", background: "var(--destructive)"
+                                }} />
+                            )}
+                            <span className="d-block" style={{ fontSize: "0.65rem" }}>Moderador</span>
+                        </NavLink>
+                    )}
 
                     {/* Settings
                     <NavLink to="/app/profile" className="btn text-center px-3">

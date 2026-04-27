@@ -110,6 +110,10 @@ export const createRequest = async (track, token) => {
             })
         });
 
+        if (response.status === 429) {
+            return { error: "rate_limit" }
+        }
+
         return await response.json();
     } catch (error) {
         console.error("Error creating request:", error);
