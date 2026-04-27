@@ -292,3 +292,16 @@ body {
   font-weight: 600;
   white-space: nowrap;
 }
+
+/*-------------- AUTH -------------- */
+.auth-input {
+  background: var(--secondary) !important;
+  border: none !important;
+  color: var(--foreground) !important;
+  padding: 14px !important;
+}
+
+.auth-input::placeholder {
+  color: var(--muted-foreground) !important;
+  opacity: 1;
+}

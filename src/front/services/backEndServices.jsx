@@ -1,5 +1,33 @@
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
+export const login = async (email, password) => {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+        });
+        return await response.json();
+    } catch (error) {
+        console.error("Error logging in:", error);
+        return { error: "Login failed" };
+    }
+};
+
+export const register = async (email, password, username) => {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/signup`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password, username })
+        });
+        return await response.json();
+    } catch (error) {
+        console.error("Error registering:", error);
+        return { error: "Register failed" };
+    }
+};
+
 export const fetchNowPlaying = async () => {
     try {
         const response = await fetch(`${BACKEND_URL}/api/public/now-playing`);
