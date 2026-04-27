@@ -1,7 +1,7 @@
 """
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
-from flask import Flask, request, jsonify, url_for, Blueprint, redirect
+from flask import Flask, request, jsonify, url_for, Blueprint, redirect, stream_with_context, Response
 from api.models import db, User, SongRequest, SongStatus, Roles, SpotifyToken, RecentlyPlayed
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
@@ -10,9 +10,42 @@ from sqlalchemy.exc import IntegrityError
 import os
 import re
 import requests
+import json
+import queue
+import threading
 from api.spotify import get_spotify_token
 from datetime import datetime, timezone, timedelta
 from api.extensions import limiter
+
+# — SSE for requests ———————————————————————————————————————————————————————————————
+_mod_subscribers = []
+_mod_lock = threading.Lock()
+
+
+def notify_moderators(data):
+    with _mod_lock:
+        dead = []
+        for q in _mod_subscribers:
+            try:
+                q.put_nowait(data)
+            except:
+                dead.append(q)
+        for q in dead:
+            _mod_subscribers.remove(q)
+
+
+def mod_subscribe():
+    q = queue.Queue()
+    with _mod_lock:
+        _mod_subscribers.append(q)
+    return q
+
+
+def mod_unsubscribe(q):
+    with _mod_lock:
+        if q in _mod_subscribers:
+            _mod_subscribers.remove(q)
+
 
 api = Blueprint('api', __name__)
 
@@ -30,6 +63,7 @@ SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token"
 SPOTIFY_API_URL = "https://api.spotify.com/v1"
 
 # — Auth ——————————————————————————————————————————————————————————————————
+
 
 @api.route('/signup', methods=['POST'])
 @limiter.limit("3 per minute")
@@ -108,6 +142,7 @@ def get_user():
         return jsonify({"error": "User not found"}), 404
     return jsonify(user.serialize()), 200
 
+
 @api.route('/me/role', methods=['GET'])
 @jwt_required()
 def get_role():
@@ -155,6 +190,8 @@ def create_request():
 
     db.session.add(song_request)
     db.session.commit()
+
+    notify_moderators(song_request.serialize())
 
     return jsonify(song_request.serialize()), 201
 
@@ -248,8 +285,44 @@ def reject_request(req_id):
 
     return jsonify(song_request.serialize()), 200
 
-# — Spotify Playing ———————————————————————————————————————————————————————
+@api.route('/moderator/events', methods=['GET'])
+def moderator_events():
+    from flask_jwt_extended import decode_token
+    token = request.args.get("token")
+    if not token:
+        return jsonify({"error": "No token"}), 401
+    try:
+        decoded = decode_token(token)
+        user_id = int(decoded["sub"])
+        user = db.session.get(User, user_id)
+        if not user or user.role not in (Roles.MOD, Roles.ADMIN):
+            return jsonify({"error": "Access denied"}), 403
+    except:
+        return jsonify({"error": "Invalid token"}), 401
 
+    def stream(q):
+        try:
+            yield "data: {\"type\": \"connected\"}\n\n"
+            while True:
+                try:
+                    data = q.get(timeout=30)
+                    yield f"data: {json.dumps(data)}\n\n"
+                except queue.Empty:
+                    yield ": ping\n\n"
+        finally:
+            mod_unsubscribe(q)
+
+    q = mod_subscribe()
+    return Response(
+        stream_with_context(stream(q)),
+        mimetype='text/event-stream',
+        headers={
+            'Cache-Control': 'no-cache',
+            'X-Accel-Buffering': 'no'
+        }
+    )
+
+# — Spotify Playing ———————————————————————————————————————————————————————
 
 @api.route('/public/now-playing', methods=['GET'])
 def now_playing():
@@ -303,10 +376,13 @@ def spotify_queue():
 
     return jsonify({"queue": queue})
 
+
 @api.route('/public/recently-played', methods=['GET'])
 def recently_played():
-    tracks = RecentlyPlayed.query.order_by(RecentlyPlayed.played_at.desc()).limit(20).all()
+    tracks = RecentlyPlayed.query.order_by(
+        RecentlyPlayed.played_at.desc()).limit(20).all()
     return jsonify({"tracks": [t.serialize() for t in tracks]})
+
 
 @api.route('/public/top-tracks', methods=['GET'])
 def top_tracks():
@@ -323,6 +399,7 @@ def top_tracks():
 
     return jsonify(response.json())
 
+
 @api.route('/public/top-artists', methods=['GET'])
 def top_artists():
     token = get_spotify_token()
@@ -338,12 +415,13 @@ def top_artists():
 
     return jsonify(response.json())
 
+
 @api.route('/spotify/autocomplete', methods=['GET'])
 def spotify_autocomplete():
     q = request.args.get("q", "").strip()
     if len(q) < 2:
         return jsonify([])
-    
+
     token = get_spotify_token()
     if not token:
         return jsonify([]), 503

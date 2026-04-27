@@ -35,11 +35,27 @@ export const Moderator = () => {
 
     useEffect(() => {
         if (!authorized) return
+
         const token = localStorage.getItem("token")
+
+        // Carga inicial
         fetchPendingRequests(token).then(data => {
             setRequests(Array.isArray(data) ? data : [])
             setLoading(false)
         })
+
+        // SSE — escucha nuevas peticiones en tiempo real
+        const es = new EventSource(`${import.meta.env.VITE_BACKEND_URL}/api/moderator/events?token=${token}`)
+
+        es.onmessage = (e) => {
+            const event = JSON.parse(e.data)
+            if (event.type === "connected") return
+            setRequests(prev => [...prev, event])
+        }
+
+        es.onerror = () => es.close()
+
+        return () => es.close()
     }, [authorized])
 
     const handleAccept = async (id) => {
