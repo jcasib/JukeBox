@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react"
-import { acceptRequest, rejectRequest, fetchPendingRequests, getUser } from "../services/backEndServices"
+import { acceptRequest, rejectRequest, fetchPendingRequests, getRole } from "../services/backEndServices"
 
 export const Moderator = () => {
     const [requests, setRequests] = useState([])
     const [loading, setLoading] = useState(true)
     const [authorized, setAuthorized] = useState(null)
-    const [user, setUser] = useState(null)
     const [rejectingId, setRejectingId] = useState(null)
     const [rejectMessage, setRejectMessage] = useState("")
     const [processingId, setProcessingId] = useState(null)
@@ -18,42 +17,30 @@ export const Moderator = () => {
         return `Hace ${Math.floor(diff / 86400)}d`
     }
 
-    
-
-const checkToken = async () => {
-    const token = localStorage.getItem("token")
-    if (!token) {
-        setAuthorized(false)
-        setLoading(false)
-        return
+    const checkRole = async () => {
+        const role = await getRole()
+        if (role === "mod" || role === "admin") {
+            setAuthorized(true)
+        } else {
+            setAuthorized(false)
+            setLoading(false)
+        }
     }
-    const data = await getUser()
-    if (data) {
-        setUser(data)
-    } else {
-        setAuthorized(false)
-        setLoading(false)
-    }
-}
 
-useEffect(() => {
-    checkToken()
-}, [])
+    useEffect(() => {
+        checkRole()
+        const id = setInterval(checkRole, 60000)
+        return () => clearInterval(id)
+    }, [])
 
-useEffect(() => {
-    if (!user) return
-    if (user.role === "mod" || user.role === "admin") {
-        setAuthorized(true)
+    useEffect(() => {
+        if (!authorized) return
         const token = localStorage.getItem("token")
         fetchPendingRequests(token).then(data => {
             setRequests(Array.isArray(data) ? data : [])
             setLoading(false)
         })
-    } else {
-        setAuthorized(false)
-        setLoading(false)
-    }
-}, [user])
+    }, [authorized])
 
     const handleAccept = async (id) => {
         const token = localStorage.getItem("token")
