@@ -11,6 +11,7 @@ import { Search } from "./pages/Search";
 import { Requests } from "./pages/Requests";
 import { Moderator } from "./pages/Moderator";
 import { Auth } from "./pages/Auth";
+import { Admin } from "./pages/Admin";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -30,6 +31,7 @@ export const router = createBrowserRouter(
         <Route path="/search" element={<Search />} />
         <Route path="/requests" element={<Requests />} />
         <Route path="/mod" element={<Moderator />} />
+        <Route path="/admin" element={<Admin />} />
       </Route>
     </>
   )

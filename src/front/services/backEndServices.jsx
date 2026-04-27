@@ -1,5 +1,6 @@
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
+//  — AUTH ————————————————————————————————————————————————————————————————————
 export const login = async (email, password) => {
     try {
         const response = await fetch(`${BACKEND_URL}/api/login`, {
@@ -28,6 +29,7 @@ export const register = async (email, password, username) => {
     }
 };
 
+//  — Jukebox ————————————————————————————————————————————————————————————————————
 export const fetchNowPlaying = async () => {
     try {
         const response = await fetch(`${BACKEND_URL}/api/public/now-playing`);
@@ -121,6 +123,7 @@ export const searchTracks = async (q, token) => {
     }
 };
 
+//  — Requests ————————————————————————————————————————————————————————————————————
 export const createRequest = async (track, token) => {
     try {
         const response = await fetch(`${BACKEND_URL}/api/requests`, {
@@ -248,3 +251,46 @@ export const getRole = async () => {
         return null
     }
 }
+
+//  — ADMIN ————————————————————————————————————————————————————————————————————
+export const fetchUsers = async (token) => {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/admin/users`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return await response.json();
+    } catch (error) {
+        console.error("Error fetching users:", error);
+        return [];
+    }
+};
+
+export const updateUserRole = async (id, role, token) => {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/admin/users/${id}/role`, {
+            method: "PUT",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ role })
+        });
+        return await response.json();
+    } catch (error) {
+        console.error("Error updating role:", error);
+        return { error: "Update failed" };
+    }
+};
+
+export const deleteUser = async (id, token) => {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/admin/users/${id}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return await response.json();
+    } catch (error) {
+        console.error("Error deleting user:", error);
+        return { error: "Delete failed" };
+    }
+};

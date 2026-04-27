@@ -545,3 +545,21 @@ def set_role(target_id):
     target.role = new_role.value
     db.session.commit()
     return jsonify(target.serialize()), 200
+
+@api.route('/admin/users/<int:target_id>', methods=['DELETE'])
+@jwt_required()
+def delete_user(target_id):
+    user, error = require_admin()
+    if error:
+        return error
+
+    target = db.session.get(User, target_id)
+    if not target:
+        return jsonify({"error": "User not found"}), 404
+
+    if target.role == Roles.ADMIN.value:
+        return jsonify({"error": "Cannot delete an admin"}), 400
+
+    db.session.delete(target)
+    db.session.commit()
+    return jsonify({"msg": "User deleted"}), 200
