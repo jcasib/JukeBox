@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { fetchTopArtists, fetchTopTracks, searchTracks, createRequest, fetchMyRequests } from "../services/backEndServices"
+import { fetchTopArtists, fetchTopTracks, searchTracks, createRequest, fetchMyRequests, fetchRecentlyPlayed, fetchSpotifyQueue } from "../services/backEndServices"
 
 export const Search = () => {
 
@@ -16,22 +16,43 @@ export const Search = () => {
     const [topArtists, setTopArtists] = useState([]);
     const [topsLoading, setTopsLoading] = useState(true);
 
+    const [queue, setQueue] = useState([])
+    const [recentlyPlayed, setRecentlyPlayed] = useState([])
+    const [alertModal, setAlertModal] = useState(null)
+
     const handleRequest = async (track) => {
         const token = localStorage.getItem("token")
         if (!token) return
+
+        if (queue.some(q => q.track_name === track.name)) {
+            setAlertModal({ msg: "Esta canción ya está en la cola", icon: "bi-collection-play" })
+            return
+        }
+        if (recentlyPlayed.some(r => r.track_id === track.id)) {
+            setAlertModal({ msg: "Esta canción ha sonado recientemente", icon: "bi-clock-history" })
+            return
+        }
+
         setRequestingId(track.id)
         await createRequest(track, token)
         setRequestedIds(prev => [...prev, track.id])
         setRequestingId(null)
     }
 
+    const getTrackAlert = (trackId, trackName) => {
+        if (queue.some(q => q.track_name === trackName)) return { msg: "Ya está en la cola", icon: "bi-collection-play", color: "var(--warning)" }
+        if (recentlyPlayed.some(r => r.track_id === trackId)) return { msg: "Ha sonado recientemente", icon: "bi-clock-history", color: "var(--muted-foreground)" }
+        return null
+    }
+
     useEffect(() => {
         const token = localStorage.getItem("token")
         if (!token) return
         fetchMyRequests(token).then(data => {
-            console.log("my requests:", data)
             if (!Array.isArray(data)) return
-            const ids = data.map(r => r.track_id)
+            const ids = data
+                .filter(r => r.status === "pending")
+                .map(r => r.track_id)
             setRequestedIds(ids)
         })
     }, [])
@@ -39,14 +60,17 @@ export const Search = () => {
     useEffect(() => {
         const loadTops = async () => {
             setTopsLoading(true)
-            const [tracks, artists] = await Promise.all([
+            const [tracks, artists, qData, recentData] = await Promise.all([
                 fetchTopTracks("medium_term"),
-                fetchTopArtists("medium_term")
+                fetchTopArtists("medium_term"),
+                fetchSpotifyQueue(),
+                fetchRecentlyPlayed(20)
             ])
             setTopTracks(tracks?.items || [])
             setTopArtists(artists?.items || [])
+            setQueue(qData?.queue || [])
+            setRecentlyPlayed(recentData?.tracks || [])
             setTopsLoading(false)
-            console.log(tracks)
         }
         loadTops()
     }, [])
@@ -179,6 +203,32 @@ export const Search = () => {
                     </div>
                 )}
             </div>
+            {/* Modal de alerta */}
+            {alertModal && (
+                <div style={{
+                    position: "fixed", inset: 0, background: "#00000099",
+                    display: "flex", alignItems: "flex-end", zIndex: 1000, marginBlockEnd: 65
+                }}>
+                    <div style={{
+                        background: "var(--secondary)", borderRadius: "16px 16px 0 0",
+                        padding: "24px", width: "100%"
+                    }}>
+                        <div className="text-center mb-3">
+                            <i className={`bi ${alertModal.icon} fs-1`} style={{ color: "var(--warning)" }} />
+                            <p className="fw-bold mt-2 mb-0">{alertModal.msg}</p>
+                            <p style={{ fontSize: "13px", color: "var(--muted-foreground)" }}>
+                                No puedes pedir esta canción en este momento
+                            </p>
+                        </div>
+                        <button
+                            className="btn secondary-bottom w-100"
+                            onClick={() => setAlertModal(null)}
+                        >
+                            Entendido
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
