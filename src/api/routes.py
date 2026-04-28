@@ -124,7 +124,7 @@ def login():
         return jsonify({"error": "Invalid credentials"}), 401
 
     access_token = create_access_token(identity=str(
-        user.id), expires_delta=timedelta(hours=6))
+        user.id), expires_delta=timedelta(days=3))
 
     return jsonify({
         "msg": "Login correcto",

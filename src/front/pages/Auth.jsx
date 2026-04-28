@@ -9,6 +9,8 @@ export const Auth = () => {
     const [username, setUsername] = useState("")
     const [error, setError] = useState(null)
     const [loading, setLoading] = useState(false)
+    const [success, setSuccess] = useState(null)
+
     const navigate = useNavigate()
 
     const handleLogin = async () => {
@@ -38,6 +40,7 @@ export const Auth = () => {
         setEmail("")
         setPassword("")
         setUsername("")
+        setSuccess("¡Cuenta creada correctamente! Ya puedes iniciar sesión.")
     }
 
     return (
@@ -66,7 +69,7 @@ export const Auth = () => {
                             background: tab === "login" ? "var(--primary)" : "transparent",
                             color: tab === "login" ? "var(--primary-foreground)" : "var(--muted-foreground)"
                         }}
-                        onClick={() => { setTab("login"); setError(null) }}
+                        onClick={() => { setTab("login"); setError(null); setSuccess(null) }}
                     >
                         Iniciar sesión
                     </button>
@@ -77,7 +80,7 @@ export const Auth = () => {
                             background: tab === "register" ? "var(--primary)" : "transparent",
                             color: tab === "register" ? "var(--primary-foreground)" : "var(--muted-foreground)"
                         }}
-                        onClick={() => { setTab("register"); setError(null) }}
+                        onClick={() => { setTab("register"); setError(null); setSuccess(null) }}
                     >
                         Registrarse
                     </button>
@@ -109,10 +112,22 @@ export const Auth = () => {
                         onChange={e => setPassword(e.target.value)}
                         onKeyDown={e => e.key === "Enter" && (tab === "login" ? handleLogin() : handleRegister())}
                     />
+                    {tab === "register" && (
+                        <div className="text-center" style={{ fontSize: "13px", color: "var(--muted-foreground)" }}>
+                            <i className="bi bi-info-circle me-1" />
+                            Usa una contraseña única que no uses en otros sitios
+                        </div>
+                    )}
 
                     {error && (
                         <div style={{ color: "var(--destructive)", fontSize: "13px", textAlign: "center" }}>
                             <i className="bi bi-exclamation-circle me-1" />{error}
+                        </div>
+                    )}
+
+                    {success && (
+                        <div style={{ color: "var(--success)", fontSize: "13px", textAlign: "center" }}>
+                            <i className="bi bi-check-circle me-1" />{success}
                         </div>
                     )}
 

@@ -1,12 +1,13 @@
-import { Outlet } from "react-router-dom/dist"
+import { Outlet, Navigate } from "react-router-dom/dist"
 import ScrollToTop from "../components/ScrollToTop"
-import { Navbar } from "../components/Navbar"
-import { Footer } from "../components/Footer"
 import { MobileNavbar } from "../components/Navbar/MobileNavbar"
 import { TopBar } from "../components/TopBar"
 
 // Base component that maintains the navbar and footer throughout the page and the scroll to top functionality.
 export const Layout = () => {
+    const token = localStorage.getItem("token")
+    
+    if (!token) return <Navigate to="/auth" replace />
     return (
         <ScrollToTop>
             <TopBar />
