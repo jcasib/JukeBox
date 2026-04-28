@@ -285,6 +285,7 @@ def reject_request(req_id):
 
     return jsonify(song_request.serialize()), 200
 
+
 @api.route('/moderator/events', methods=['GET'])
 def moderator_events():
     from flask_jwt_extended import decode_token
@@ -323,6 +324,7 @@ def moderator_events():
     )
 
 # — Spotify Playing ———————————————————————————————————————————————————————
+
 
 @api.route('/public/now-playing', methods=['GET'])
 def now_playing():
@@ -546,6 +548,7 @@ def set_role(target_id):
     db.session.commit()
     return jsonify(target.serialize()), 200
 
+
 @api.route('/admin/users/<int:target_id>', methods=['DELETE'])
 @jwt_required()
 def delete_user(target_id):
@@ -563,3 +566,124 @@ def delete_user(target_id):
     db.session.delete(target)
     db.session.commit()
     return jsonify({"msg": "User deleted"}), 200
+
+# — Spotify Player Controls ———————————————————————————————————————————————
+
+
+@api.route('/admin/player/play', methods=['PUT'])
+@jwt_required()
+def player_play():
+    user, error = require_admin()
+    if error:
+        return error
+    token = get_spotify_token()
+    if not token:
+        return jsonify({"error": "Spotify not connected"}), 503
+    requests.put(f"{SPOTIFY_API_URL}/me/player/play", headers={
+        "Authorization": f"Bearer {token}"
+    })
+    return jsonify({"msg": "Playing"}), 200
+
+
+@api.route('/admin/player/pause', methods=['PUT'])
+@jwt_required()
+def player_pause():
+    user, error = require_admin()
+    if error:
+        return error
+    token = get_spotify_token()
+    if not token:
+        return jsonify({"error": "Spotify not connected"}), 503
+    requests.put(f"{SPOTIFY_API_URL}/me/player/pause", headers={
+        "Authorization": f"Bearer {token}"
+    })
+    return jsonify({"msg": "Paused"}), 200
+
+
+@api.route('/admin/player/next', methods=['POST'])
+@jwt_required()
+def player_next():
+    user, error = require_admin()
+    if error:
+        return error
+    token = get_spotify_token()
+    if not token:
+        return jsonify({"error": "Spotify not connected"}), 503
+    requests.post(f"{SPOTIFY_API_URL}/me/player/next", headers={
+        "Authorization": f"Bearer {token}"
+    })
+    return jsonify({"msg": "Next"}), 200
+
+
+@api.route('/admin/player/previous', methods=['POST'])
+@jwt_required()
+def player_previous():
+    user, error = require_admin()
+    if error:
+        return error
+    token = get_spotify_token()
+    if not token:
+        return jsonify({"error": "Spotify not connected"}), 503
+    requests.post(f"{SPOTIFY_API_URL}/me/player/previous", headers={
+        "Authorization": f"Bearer {token}"
+    })
+    return jsonify({"msg": "Previous"}), 200
+
+
+@api.route('/admin/player/volume', methods=['PUT'])
+@jwt_required()
+def player_volume():
+    user, error = require_admin()
+    if error:
+        return error
+    token = get_spotify_token()
+    if not token:
+        return jsonify({"error": "Spotify not connected"}), 503
+    volume = request.args.get("volume_percent", 50)
+    requests.put(f"{SPOTIFY_API_URL}/me/player/volume", headers={
+        "Authorization": f"Bearer {token}"
+    }, params={"volume_percent": volume})
+    return jsonify({"msg": "Volume updated"}), 200
+
+
+@api.route('/admin/player/shuffle', methods=['PUT'])
+@jwt_required()
+def player_shuffle():
+    user, error = require_admin()
+    if error:
+        return error
+    token = get_spotify_token()
+    if not token:
+        return jsonify({"error": "Spotify not connected"}), 503
+    state = request.args.get("state", "false")
+    requests.put(f"{SPOTIFY_API_URL}/me/player/shuffle", headers={
+        "Authorization": f"Bearer {token}"
+    }, params={"state": state})
+    return jsonify({"msg": "Shuffle updated"}), 200
+
+
+@api.route('/admin/spotify/status', methods=['GET'])
+@jwt_required()
+def spotify_status():
+    user, error = require_admin()
+    if error:
+        return error
+    token = get_spotify_token()
+    if not token:
+        return jsonify({"connected": False})
+
+    # Verificar que el token funciona realmente
+    response = requests.get(f"{SPOTIFY_API_URL}/me", headers={
+        "Authorization": f"Bearer {token}"
+    })
+
+    if response.status_code != 200:
+        return jsonify({"connected": False})
+
+    from api.models import SpotifyToken
+    record = SpotifyToken.query.first()
+    return jsonify({
+        "connected": True,
+        "updated_at": record.updated_at.isoformat(),
+        "expires_at": record.expires_at.isoformat() if record.expires_at else None
+    })

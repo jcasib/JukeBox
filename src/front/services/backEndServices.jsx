@@ -294,3 +294,57 @@ export const deleteUser = async (id, token) => {
         return { error: "Delete failed" };
     }
 };
+
+//  — Spotify Player Controls ————————————————————————————————————————————————————————————————————
+export const fetchSpotifyStatus = async (token) => {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/admin/spotify/status`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return await response.json();
+    } catch (error) {
+        return { connected: false };
+    }
+};
+
+export const playerPlay = async (token) => {
+    await fetch(`${BACKEND_URL}/api/admin/player/play`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` }
+    });
+};
+
+export const playerPause = async (token) => {
+    await fetch(`${BACKEND_URL}/api/admin/player/pause`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` }
+    });
+};
+
+export const playerNext = async (token) => {
+    await fetch(`${BACKEND_URL}/api/admin/player/next`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` }
+    });
+};
+
+export const playerPrevious = async (token) => {
+    await fetch(`${BACKEND_URL}/api/admin/player/previous`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` }
+    });
+};
+
+export const playerVolume = async (volume, token) => {
+    await fetch(`${BACKEND_URL}/api/admin/player/volume?volume_percent=${volume}`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` }
+    });
+};
+
+export const playerShuffle = async (state, token) => {
+    await fetch(`${BACKEND_URL}/api/admin/player/shuffle?state=${state}`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` }
+    });
+};
