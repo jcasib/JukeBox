@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 import os
-from flask import Flask, request, jsonify, url_for, send_from_directory
+from flask import Flask, request, jsonify, url_for, send_from_directory, redirect, session
 from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_jwt_extended import JWTManager
@@ -84,6 +84,27 @@ def serve_any_other_file(path):
     response.cache_control.max_age = 0  # avoid cache memory
     return response
 
+
+ADMIN_PASSWORD = os.getenv("ADMIN_PANEL_PASSWORD", "changeme")
+
+@app.route('/admin_login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        if request.form.get('password') == ADMIN_PASSWORD:
+            session['admin_logged_in'] = True
+            return redirect('/admin')
+        return '<p>Contraseña incorrecta</p><a href="/admin_login">Volver</a>'
+    return '''
+        <form method="post">
+            <input type="password" name="password" placeholder="Contraseña" />
+            <button type="submit">Entrar</button>
+        </form>
+    '''
+
+@app.route('/admin_logout')
+def admin_logout():
+    session.pop('admin_logged_in', None)
+    return redirect('/admin_login')
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
