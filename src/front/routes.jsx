@@ -13,6 +13,7 @@ import { Moderator } from "./pages/Moderator";
 import { Auth } from "./pages/Auth";
 import { Admin } from "./pages/Admin";
 import { Player } from "./pages/Player";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -28,9 +29,9 @@ export const router = createBrowserRouter(
       <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>} >
 
         {/* Nested Routes: Defines sub-routes within the BaseHome component. */}
-        <Route path="/" element={<Home />} />
-        <Route path="/search" element={<Search />} />
-        <Route path="/requests" element={<Requests />} />
+        <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+        <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
+        <Route path="/requests" element={<ProtectedRoute><Requests /></ProtectedRoute>} />
         <Route path="/mod" element={<Moderator />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/player" element={<Player />} />
