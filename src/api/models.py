@@ -28,9 +28,12 @@ class User(db.Model):
     password_hash: Mapped[str] = mapped_column(nullable=False)
     username: Mapped[str] = mapped_column(
         String(120), unique=True, nullable=False)
-    role: Mapped[Roles] = mapped_column(Enum(Roles, name="roles"), default=Roles.USER)
+    role: Mapped[Roles] = mapped_column(
+        Enum(Roles, name="roles"), default=Roles.USER)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    muted_until: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=True, default=None)
 
     song_requests: Mapped[List["SongRequest"]] = relationship(
         "SongRequest", back_populates="user", cascade="all, delete-orphan")
@@ -56,7 +59,8 @@ class User(db.Model):
                     "status": song.status.value
                 }
                 for song in self.song_requests
-            ]
+            ],
+            "muted_until": self.muted_until.isoformat() if self.muted_until else None
             # do not serialize the password, its a security breach
         }
 
@@ -111,7 +115,8 @@ class SpotifyToken(db.Model):
             "updated_at": self.updated_at.isoformat(),
             "expires_at": self.expires_at.isoformat()
         }
-    
+
+
 class RecentlyPlayed(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     track_id: Mapped[str] = mapped_column(String(100), nullable=False)

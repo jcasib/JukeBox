@@ -172,11 +172,22 @@ def spotify_search():
 
 @api.route('/requests', methods=['POST'])
 @jwt_required()
-@limiter.limit("5 per minute; 20 per hour")
 def create_request():
     user_id = int(get_jwt_identity())
     user = db.session.get(User, user_id)
 
+    # Comprobar mute
+    if user.muted_until and user.muted_until > datetime.now(timezone.utc):
+        return jsonify({
+            "error": "muted",
+            "muted_until": user.muted_until.isoformat()
+        }), 403
+
+    # Aplicar rate limit
+    return _create_request_limited(user_id, user)
+
+@limiter.limit("5 per minute; 30 per hour")
+def _create_request_limited(user_id, user):
     body = request.get_json() or {}
     song_request = SongRequest(
         user_id=user_id,
@@ -187,12 +198,9 @@ def create_request():
         album_image=body.get("album_image"),
         status=SongStatus.PENDING
     )
-
     db.session.add(song_request)
     db.session.commit()
-
     notify_moderators(song_request.serialize())
-
     return jsonify(song_request.serialize()), 201
 
 
@@ -566,6 +574,47 @@ def delete_user(target_id):
     db.session.delete(target)
     db.session.commit()
     return jsonify({"msg": "User deleted"}), 200
+
+
+@api.route('/admin/users/<int:target_id>/mute', methods=['PUT'])
+@jwt_required()
+def mute_user(target_id):
+    user, error = require_admin()
+    if error:
+        return error
+
+    body = request.get_json() or {}
+    minutes = body.get("minutes", 60)
+
+    target = db.session.get(User, target_id)
+    if not target:
+        return jsonify({"error": "User not found"}), 404
+
+    target.muted_until = datetime.now(
+        timezone.utc) + timedelta(minutes=minutes)
+    db.session.commit()
+
+    return jsonify({
+        "msg": f"User muted for {minutes} minutes",
+        "muted_until": target.muted_until.isoformat()
+    }), 200
+
+
+@api.route('/admin/users/<int:target_id>/unmute', methods=['PUT'])
+@jwt_required()
+def unmute_user(target_id):
+    user, error = require_admin()
+    if error:
+        return error
+
+    target = db.session.get(User, target_id)
+    if not target:
+        return jsonify({"error": "User not found"}), 404
+
+    target.muted_until = None
+    db.session.commit()
+
+    return jsonify({"msg": "User unmuted"}), 200
 
 # — Spotify Player Controls ———————————————————————————————————————————————
 

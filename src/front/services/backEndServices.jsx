@@ -295,6 +295,36 @@ export const deleteUser = async (id, token) => {
     }
 };
 
+export const muteUser = async (id, minutes, token) => {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/admin/users/${id}/mute`, {
+            method: "PUT",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ minutes })
+        });
+        return await response.json()
+    } catch (error) {
+        console.error("Error muting user:", error);
+        return { error: "Mute failed" };
+    }    
+};
+
+export const unmuteUser = async (id, token) => {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/admin/users/${id}/unmute`, {
+            method: "PUT",
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return await response.json();        
+    } catch (error) {
+        console.error("Error unmuting user:", error);
+        return { error: "Unmute failed" }
+    }
+};
+
 //  — Spotify Player Controls ————————————————————————————————————————————————————————————————————
 export const fetchSpotifyStatus = async (token) => {
     try {

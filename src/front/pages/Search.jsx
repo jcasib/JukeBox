@@ -36,6 +36,28 @@ export const Search = () => {
         setRequestingId(track.id)
         const result = await createRequest(track, token)
 
+        if (result?.error === "muted") {
+            const until = new Date(result.muted_until)
+            const diff = Math.ceil((until - new Date()) / 60000)
+            const hours = Math.floor(diff / 60)
+            const mins = diff % 60
+            let timeMsg
+            if (diff < 60) {
+                timeMsg = diff === 1 ? "1 minuto" : `${diff} minutos`
+            } else if (mins === 0) {
+                timeMsg = hours === 1 ? "1 hora" : `${hours} horas`
+            } else {
+                timeMsg = `${hours}h ${mins}min`
+            }
+            setAlertModal({
+                msg: `Peticiones desactivadas temporalmente para ti`,
+                submsg: `Vuelve a intentarlo en ${timeMsg}`,
+                icon: "bi-person-slash"
+            })
+            setRequestingId(null)
+            return
+        }
+
         if (result?.error === "rate_limit") {
             setAlertModal({ msg: "Has hecho demasiadas peticiones, espera un momento", icon: "bi-exclamation-circle" })
             setRequestingId(null)
@@ -109,7 +131,7 @@ export const Search = () => {
             </div>
             <div className="mb-3 px-1" style={{ fontSize: "13px", color: "var(--muted-foreground)" }}>
                 <i className="bi bi-info-circle me-1" />
-                Puedes pedir un máximo de 20 canciones por hora
+                Puedes pedir un máximo de 30 canciones por hora
             </div>
 
             {query.trim().length >= 2 && (
@@ -221,6 +243,11 @@ export const Search = () => {
                         <div className="text-center mb-3">
                             <i className={`bi ${alertModal.icon} fs-1`} style={{ color: "var(--warning)" }} />
                             <p className="fw-bold mt-2 mb-0">{alertModal.msg}</p>
+                            {alertModal.submsg && (
+                                <p className="fw-bold mb-1">
+                                    {alertModal.submsg}
+                                </p>
+                            )}
                             <p style={{ fontSize: "13px", color: "var(--muted-foreground)" }}>
                                 No puedes pedir esta canción en este momento
                             </p>
