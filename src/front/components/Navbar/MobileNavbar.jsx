@@ -29,7 +29,7 @@ export const MobileNavbar = () => {
 
         const token = localStorage.getItem("token")
 
-        // Carga inicial del contador
+        // Carga inicial
         fetch(`${import.meta.env.VITE_BACKEND_URL}/api/moderator/requests`, {
             headers: { Authorization: `Bearer ${token}` }
         })
@@ -38,18 +38,28 @@ export const MobileNavbar = () => {
                 if (Array.isArray(data)) dispatch({ type: 'set_pending_count', payload: data.length })
             })
 
-        // SSE — incrementa cuando llega nueva petición
-        const es = new EventSource(`${import.meta.env.VITE_BACKEND_URL}/api/moderator/events?token=${token}`)
+        // SSE — comentado por incompatibilidad con Gunicorn sync
+        // const es = new EventSource(`${import.meta.env.VITE_BACKEND_URL}/api/moderator/events?token=${token}`)
+        // es.onmessage = (e) => {
+        //     const event = JSON.parse(e.data)
+        //     if (event.type === "connected") return
+        //     dispatch({ type: 'set_pending_count', payload: store.pendingCount + 1 })
+        // }
+        // es.onerror = () => es.close()
+        // return () => es.close()
 
-        es.onmessage = (e) => {
-            const event = JSON.parse(e.data)
-            if (event.type === "connected") return
-            dispatch({ type: 'set_pending_count', payload: store.pendingCount + 1 })
-        }
+        // Polling cada 30 segundos
+        const id = setInterval(() => {
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/moderator/requests`, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (Array.isArray(data)) dispatch({ type: 'set_pending_count', payload: data.length })
+                })
+        }, 30000)
 
-        es.onerror = () => es.close()
-
-        return () => es.close()
+        return () => clearInterval(id)
     }, [authorized])
 
     return (

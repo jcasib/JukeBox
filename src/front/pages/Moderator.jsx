@@ -47,18 +47,24 @@ export const Moderator = () => {
             setLoading(false)
         })
 
-        // SSE — escucha nuevas peticiones en tiempo real
-        const es = new EventSource(`${import.meta.env.VITE_BACKEND_URL}/api/moderator/events?token=${token}`)
+        // SSE — comentado por incompatibilidad con Gunicorn sync
+        // const es = new EventSource(`${import.meta.env.VITE_BACKEND_URL}/api/moderator/events?token=${token}`)
+        // es.onmessage = (e) => {
+        //     const event = JSON.parse(e.data)
+        //     if (event.type === "connected") return
+        //     setRequests(prev => [...prev, event])
+        // }
+        // es.onerror = () => es.close()
+        // return () => es.close()
 
-        es.onmessage = (e) => {
-            const event = JSON.parse(e.data)
-            if (event.type === "connected") return
-            setRequests(prev => [...prev, event])
-        }
+        // Polling cada 15 segundos
+        const id = setInterval(() => {
+            fetchPendingRequests(token).then(data => {
+                if (Array.isArray(data)) setRequests(data)
+            })
+        }, 15000)
 
-        es.onerror = () => es.close()
-
-        return () => es.close()
+        return () => clearInterval(id)
     }, [authorized])
 
     const refreshCount = async () => {
