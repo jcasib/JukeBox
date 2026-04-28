@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { fetchNowPlaying, fetchSpotifyQueue, fetchRecentlyPlayed } from "../services/backEndServices";
 import SoundWave from "../components/SoundWave";
+import { Link } from "react-router-dom";
 
 export const Home = () => {
 	const [nowPlaying, setNowPlaying] = useState(null)
@@ -10,14 +11,6 @@ export const Home = () => {
 	const [progress, setProgress] = useState(0)
 	const progressRef = useRef(0)
 	const lastTrackIdRef = useRef(null)
-
-	const formatTime = (ms) => {
-		if (!ms) return "0:00"
-		const total = Math.floor(ms / 1000)
-		const m = Math.floor(total / 60)
-		const s = total % 60
-		return `${m}:${s.toString().padStart(2, "0")}`
-	}
 
 	const loadRecentlyPlayed = async () => {
 		const data = await fetchRecentlyPlayed(20)
@@ -67,12 +60,12 @@ export const Home = () => {
 				<h1 className="fw-bold">Pide música en segundos y sigue la cola al momento.</h1>
 				<h6>Busca como en Spotify, añade tu tema favorito y revisa el estado de tus peticiones.</h6>
 				<div className="d-flex justify-content-center gap-2">
-					<button className="btn primary-bottom">
+					<Link to="/search" className="btn primary-bottom">
 						<i className="bi bi-search me-2"></i><span>Buscar canción</span>
-					</button>
-					<button className="btn secondary-bottom">
+					</Link>
+					<Link to="/requests" className="btn secondary-bottom">
 						<i className="bi bi-music-note-list me-2"></i><span>Mis peticiones</span>
-					</button>
+					</Link>
 				</div>
 			</div>
 
