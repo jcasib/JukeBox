@@ -24,6 +24,7 @@ flask-limiter = "*"
 flask-bcrypt = "*"
 requests = "*"
 apscheduler = "*"
+gevent = "*"
 
 [requires]
 python_version = "3.13"
