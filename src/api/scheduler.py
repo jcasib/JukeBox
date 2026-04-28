@@ -77,7 +77,7 @@ def clear_old_requests(app):
 
 def start_scheduler(app):
     import os
-    if os.environ.get('WERKZEUG_RUN_MAIN') != 'true':
+    if os.environ.get('FLASK_ENV') == 'development' and os.environ.get('WERKZEUG_RUN_MAIN') != 'true':
         return
     if not scheduler.running:
         scheduler.add_job(
