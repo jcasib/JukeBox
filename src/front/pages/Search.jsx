@@ -131,7 +131,7 @@ export const Search = () => {
             </div>
             <div className="mb-3 px-1" style={{ fontSize: "13px", color: "var(--muted-foreground)" }}>
                 <i className="bi bi-info-circle me-1" />
-                Puedes pedir un máximo de 30 canciones por hora
+                Puedes pedir un máximo de 20 canciones por hora
             </div>
 
             {query.trim().length >= 2 && (

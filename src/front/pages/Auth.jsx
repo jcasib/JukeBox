@@ -55,7 +55,7 @@ export const Auth = () => {
         }}>
             <div style={{ width: "100%", maxWidth: "400px" }}>
                 <div className="text-center mb-4">
-                    <i className="bi bi-music-note-beamed" style={{ fontSize: "48px", color: "var(--primary)" }} />
+                    <img src="src/front/assets/img/Jukebox_logo (1).png" style={{ width: "150px" }}/>
                     <h1 className="fw-bold mt-2">Jukebox</h1>
                     <p style={{ color: "var(--muted-foreground)" }}>Pide música en segundos</p>
                 </div>

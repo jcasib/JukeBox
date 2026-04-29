@@ -186,7 +186,7 @@ def create_request():
     # Aplicar rate limit
     return _create_request_limited(user_id, user)
 
-@limiter.limit("5 per minute; 30 per hour")
+@limiter.limit("5 per minute; 20 per hour")
 def _create_request_limited(user_id, user):
     body = request.get_json() or {}
     song_request = SongRequest(
