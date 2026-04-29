@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { login, register } from "../services/backEndServices"
+import logo from "../assets/img/Jukebox_logo.png"
 
 export const Auth = () => {
     const [tab, setTab] = useState("login")
@@ -55,7 +56,7 @@ export const Auth = () => {
         }}>
             <div style={{ width: "100%", maxWidth: "400px" }}>
                 <div className="text-center mb-4">
-                    <img src="src/front/assets/img/Jukebox_logo (1).png" style={{ width: "150px" }}/>
+                    <img src={logo} style={{ width: "120px" }}/>
                     <h1 className="fw-bold mt-2">Jukebox</h1>
                     <p style={{ color: "var(--muted-foreground)" }}>Pide música en segundos</p>
                 </div>
