@@ -16,20 +16,24 @@ export const TutorialTooltip = ({ steps }) => {
         const el = document.querySelector(currentStep.selector)
         if (!el) return
 
-        const rect = el.getBoundingClientRect()
-        setPos({
-            top: rect.bottom + window.scrollY + 12,
-            left: rect.left + rect.width / 2,
-        })
-
-        // Scroll al elemento
         el.scrollIntoView({ behavior: "smooth", block: "center" })
 
-        // Highlight
+        const timer = setTimeout(() => {
+            const rect = el.getBoundingClientRect()
+            const isTop = currentStep.position === "top"
+            setPos({
+                top: isTop
+                    ? rect.top + window.scrollY - 180
+                    : rect.bottom + window.scrollY + 12,
+                left: rect.left + rect.width / 2,
+            })
+        }, 400)
+
         el.style.outline = "2px solid var(--primary)"
         el.style.borderRadius = "8px"
 
         return () => {
+            clearTimeout(timer)
             el.style.outline = ""
             el.style.borderRadius = ""
         }
@@ -38,19 +42,19 @@ export const TutorialTooltip = ({ steps }) => {
     if (!active || !currentStep || !pos) return null
 
     const handleNext = () => {
-    if (currentStep.navigateTo) {
-        navigate(currentStep.navigateTo)
-        setTimeout(() => {
+        if (currentStep.navigateTo) {
+            navigate(currentStep.navigateTo)
+            setTimeout(() => {
+                dispatch({ type: 'end_tutorial' })
+                setTimeout(() => dispatch({ type: 'start_tutorial' }), 100)
+            }, 300)
+        } else if (step >= steps.length - 1) {
             dispatch({ type: 'end_tutorial' })
-            setTimeout(() => dispatch({ type: 'start_tutorial' }), 100)
-        }, 300)
-    } else if (step >= steps.length - 1) {
-        dispatch({ type: 'end_tutorial' })
-        localStorage.setItem("tutorial_done", "true")
-    } else {
-        dispatch({ type: 'next_tutorial_step' })
+            localStorage.setItem("tutorial_done", "true")
+        } else {
+            dispatch({ type: 'next_tutorial_step' })
+        }
     }
-}
 
     const handleSkip = () => {
         dispatch({ type: 'end_tutorial' })

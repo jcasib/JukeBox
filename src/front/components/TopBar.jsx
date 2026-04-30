@@ -61,72 +61,73 @@ export const TopBar = () => {
                 </div>
 
             </div>
-
-            {(location.pathname === "/" || location.pathname === "/search") && (
-                <button
-                    className="btn"
-                    style={{ color: "var(--muted-foreground)", fontSize: "18px", padding: "4px 8px" }}
-                    onClick={handleTutorial}
-                    title="Tutorial"
-                >
-                    <i className="bi bi-question-circle" />
-                </button>
-            )}
-            {/* Control de usuario */}
-            {token ? (
-                <div style={{ position: "relative" }} ref={dropdownRef}>
+            <div className="d-flex">
+                {(location.pathname === "/" || location.pathname === "/search") && (
                     <button
                         className="btn"
-                        style={{ color: "var(--foreground)", fontSize: "22px", padding: "4px 8px" }}
-                        onClick={() => setDropdownOpen(prev => !prev)}
+                        style={{ color: "var(--muted-foreground)", fontSize: "18px", padding: "4px 8px" }}
+                        onClick={handleTutorial}
+                        title="Tutorial"
                     >
-                        <i className="bi bi-person-circle" />
+                        <i className="bi bi-question-circle" />
                     </button>
+                )}
+                {/* Control de usuario */}
+                {token ? (
+                    <div style={{ position: "relative" }} ref={dropdownRef}>
+                        <button
+                            className="btn"
+                            style={{ color: "var(--foreground)", fontSize: "22px", padding: "4px 8px" }}
+                            onClick={() => setDropdownOpen(prev => !prev)}
+                        >
+                            <i className="bi bi-person-circle" />
+                        </button>
 
-                    {dropdownOpen && (
-                        <div style={{
-                            position: "absolute", right: 0, top: "110%",
-                            background: "var(--secondary)", borderRadius: "var(--radius-md)",
-                            minWidth: "180px", zIndex: 1000, overflow: "hidden",
-                            boxShadow: "0 4px 20px #00000040"
-                        }}>
-                            {role === "admin" && (
-                                <>
-                                    <button
-                                        className="btn w-100 text-start px-3 py-2"
-                                        style={{ color: "var(--foreground)", borderRadius: 0 }}
-                                        onClick={() => { navigate("/admin"); setDropdownOpen(false) }}
-                                    >
-                                        <i className="bi bi-people me-2" />Gestión de usuarios
-                                    </button>
-                                    <button
-                                        className="btn w-100 text-start px-3 py-2"
-                                        style={{ color: "var(--foreground)", borderRadius: 0 }}
-                                        onClick={() => { navigate("/player"); setDropdownOpen(false) }}
-                                    >
-                                        <i className="bi bi-spotify me-2" />Panel de Spotify
-                                    </button>
-                                    <div style={{ height: "1px", background: "var(--border)" }} />
-                                </>
-                            )}
-                            <button
-                                className="btn w-100 text-start px-3 py-2"
-                                style={{ color: "var(--destructive)", borderRadius: 0 }}
-                                onClick={handleLogout}
-                            >
-                                <i className="bi bi-box-arrow-right me-2" />Cerrar sesión
-                            </button>
-                        </div>
-                    )}
-                </div>
-            ) : (
-                <button
-                    className="btn primary-bottom btn-sm"
-                    onClick={() => navigate("/auth")}
-                >
-                    Iniciar sesión
-                </button>
-            )}
+                        {dropdownOpen && (
+                            <div style={{
+                                position: "absolute", right: 0, top: "110%",
+                                background: "var(--secondary)", borderRadius: "var(--radius-md)",
+                                minWidth: "180px", zIndex: 1000, overflow: "hidden",
+                                boxShadow: "0 4px 20px #00000040"
+                            }}>
+                                {role === "admin" && (
+                                    <>
+                                        <button
+                                            className="btn w-100 text-start px-3 py-2"
+                                            style={{ color: "var(--foreground)", borderRadius: 0 }}
+                                            onClick={() => { navigate("/admin"); setDropdownOpen(false) }}
+                                        >
+                                            <i className="bi bi-people me-2" />Gestión de usuarios
+                                        </button>
+                                        <button
+                                            className="btn w-100 text-start px-3 py-2"
+                                            style={{ color: "var(--foreground)", borderRadius: 0 }}
+                                            onClick={() => { navigate("/player"); setDropdownOpen(false) }}
+                                        >
+                                            <i className="bi bi-spotify me-2" />Panel de Spotify
+                                        </button>
+                                        <div style={{ height: "1px", background: "var(--border)" }} />
+                                    </>
+                                )}
+                                <button
+                                    className="btn w-100 text-start px-3 py-2"
+                                    style={{ color: "var(--destructive)", borderRadius: 0 }}
+                                    onClick={handleLogout}
+                                >
+                                    <i className="bi bi-box-arrow-right me-2" />Cerrar sesión
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <button
+                        className="btn primary-bottom btn-sm"
+                        onClick={() => navigate("/auth")}
+                    >
+                        Iniciar sesión
+                    </button>
+                )}
+            </div>
         </div>
     )
 }

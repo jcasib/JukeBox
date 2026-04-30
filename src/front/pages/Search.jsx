@@ -133,11 +133,13 @@ export const Search = () => {
             selector: "[href='/requests']",
             title: "📋 Mis peticiones",
             description: "Aquí puedes ver el estado de todas tus peticiones — pendientes, aceptadas o rechazadas.",
+            position: "top"
         },
         {
             selector: "[href='/']",
             title: "🏠 Inicio",
             description: "Vuelve al inicio para seguir la cola en tiempo real. ¡Disfruta de la música!",
+            position: "top"
         }
     ]
 
