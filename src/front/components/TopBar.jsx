@@ -2,6 +2,8 @@ import { useEffect, useState, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { getRole } from "../services/backEndServices"
 import logo from "../assets/img/Jukebox_logo.png"
+import useGlobalReducer from "../hooks/useGlobalReducer"
+import { useLocation } from "react-router-dom"
 
 export const TopBar = () => {
     const [role, setRole] = useState(null)
@@ -33,6 +35,14 @@ export const TopBar = () => {
 
     const token = localStorage.getItem("token")
 
+    const { dispatch } = useGlobalReducer()
+    const location = useLocation()
+
+    const handleTutorial = () => {
+        localStorage.removeItem("tutorial_done")
+        dispatch({ type: 'start_tutorial' })
+    }
+
     return (
         <div style={{
             background: "var(--sidebar)",
@@ -52,6 +62,16 @@ export const TopBar = () => {
 
             </div>
 
+            {(location.pathname === "/" || location.pathname === "/search") && (
+                <button
+                    className="btn"
+                    style={{ color: "var(--muted-foreground)", fontSize: "18px", padding: "4px 8px" }}
+                    onClick={handleTutorial}
+                    title="Tutorial"
+                >
+                    <i className="bi bi-question-circle" />
+                </button>
+            )}
             {/* Control de usuario */}
             {token ? (
                 <div style={{ position: "relative" }} ref={dropdownRef}>
