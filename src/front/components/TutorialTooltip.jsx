@@ -27,7 +27,7 @@ export const TutorialTooltip = ({ steps }) => {
                     : rect.bottom + window.scrollY + 12,
                 left: rect.left + rect.width / 2,
             })
-        }, 400)
+        }, 200)
 
         el.style.outline = "2px solid var(--primary)"
         el.style.borderRadius = "8px"

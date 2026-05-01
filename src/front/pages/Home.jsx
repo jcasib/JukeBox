@@ -70,7 +70,7 @@ export const Home = () => {
 		{
 			selector: "#playerCard",
 			title: "🎵 Canción en reproducción",
-			description: "Aquí ves la canción que está sonando en este momento en el bar."
+			description: "Aquí ves la canción que está sonando en este momento."
 		},
 		{
 			selector: ".d-flex.gap-2.mb-3",
