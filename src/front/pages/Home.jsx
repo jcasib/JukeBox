@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { fetchNowPlaying, fetchSpotifyQueue, fetchRecentlyPlayed } from "../services/backEndServices";
 import SoundWave from "../components/SoundWave";
 import { Link } from "react-router-dom";
+import { TutorialTooltip } from "../components/TutorialTooltip"
+import useGlobalReducer from "../hooks/useGlobalReducer"
 
 export const Home = () => {
 	const [nowPlaying, setNowPlaying] = useState(null)
@@ -53,6 +55,35 @@ export const Home = () => {
 		const id = setInterval(poll, 5000)
 		return () => clearInterval(id)
 	}, [])
+
+	const { store, dispatch } = useGlobalReducer()
+
+	// Detectar primera vez
+	useEffect(() => {
+		const done = localStorage.getItem("tutorial_done")
+		if (!done) {
+			dispatch({ type: 'start_tutorial' })
+		}
+	}, [])
+
+	const homeTutorialSteps = [
+		{
+			selector: "#playerCard",
+			title: "🎵 Canción en reproducción",
+			description: "Aquí ves la canción que está sonando en este momento en el bar."
+		},
+		{
+			selector: ".d-flex.gap-2.mb-3",
+			title: "📋 Cola e historial",
+			description: "Cambia entre ver lo que viene a continuación y las canciones que han sonado recientemente."
+		},
+		{
+			selector: "[href='/search']",
+			title: "🔍 Buscar canciones",
+			description: "Pulsa aquí para buscar tu canción favorita y pedirla.",
+			navigateTo: "/search"
+		}
+	]
 
 	return (
 		<div className="container-fluid">
@@ -133,6 +164,7 @@ export const Home = () => {
 			) : (
 				<div id="playerCard" className="mb-3 d-flex justify-content-center">No hay nada sonando en este momento</div>
 			)}
+			<TutorialTooltip steps={homeTutorialSteps} />
 		</div>
 	);
 };

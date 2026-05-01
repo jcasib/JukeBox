@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react"
 import { fetchTopArtists, fetchTopTracks, searchTracks, createRequest, fetchMyRequests, fetchRecentlyPlayed, fetchSpotifyQueue } from "../services/backEndServices"
+import { TutorialTooltip } from "../components/TutorialTooltip"
+import useGlobalReducer from "../hooks/useGlobalReducer"
 
 export const Search = () => {
 
@@ -113,6 +115,33 @@ export const Search = () => {
 
         return () => clearTimeout(delay)
     }, [query])
+
+    const { store, dispatch } = useGlobalReducer()
+
+    const searchTutorialSteps = [
+        {
+            selector: "#searchBar",
+            title: "🔍 Busca tu canción",
+            description: "Escribe el nombre de una canción o artista para encontrarla."
+        },
+        {
+            selector: "#topSong-card",
+            title: "➕ Pide una canción",
+            description: "Pulsa el botón + para pedir la canción. El moderador la revisará y la añadirá a la cola."
+        },
+        {
+            selector: "[href='/requests']",
+            title: "📋 Mis peticiones",
+            description: "Aquí puedes ver el estado de todas tus peticiones — pendientes, aceptadas o rechazadas.",
+            position: "top"
+        },
+        {
+            selector: "[href='/']",
+            title: "🏠 Inicio",
+            description: "Vuelve al inicio para seguir la cola en tiempo real. ¡Disfruta de la música!",
+            position: "top"
+        }
+    ]
 
     return (
         <div className="container-fluid">
@@ -261,6 +290,7 @@ export const Search = () => {
                     </div>
                 </div>
             )}
+            <TutorialTooltip steps={searchTutorialSteps} />
         </div>
     )
 }
