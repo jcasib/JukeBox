@@ -34,6 +34,7 @@ class User(db.Model):
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     muted_until: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=True, default=None)
+    accepted_privacy: Mapped[bool] = mapped_column(default=False)
 
     song_requests: Mapped[List["SongRequest"]] = relationship(
         "SongRequest", back_populates="user", cascade="all, delete-orphan")
@@ -50,6 +51,7 @@ class User(db.Model):
             "email": self.email,
             "username": self.username,
             "role": self.role.value,
+            "accepted_privacy": self.accepted_privacy,
             "song_requests": [
                 {
                     "id": song.id,

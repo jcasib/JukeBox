@@ -90,7 +90,7 @@ def signup():
     if not re.match(password_regex, password):
         return jsonify({"error": "The password must contain at least one letter and one number"}), 400
 
-    new_user = User(email=email, username=username)
+    new_user = User(email=email, username=username, accepted_privacy=True)
     new_user.set_password(password)
 
     try:
@@ -152,6 +152,16 @@ def get_role():
         return jsonify({"error": "User not found"}), 404
     return jsonify({"role": user.role.value}), 200
 
+@api.route('/accept-privacy', methods=['PUT'])
+@jwt_required()
+def accept_privacy():
+    user_id = int(get_jwt_identity())
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    user.accepted_privacy = True
+    db.session.commit()
+    return jsonify({"msg": "Privacy accepted"}), 200
 # — Spotify Search ————————————————————————————————————————————————————————
 
 

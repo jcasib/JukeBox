@@ -11,6 +11,7 @@ export const Auth = () => {
     const [error, setError] = useState(null)
     const [loading, setLoading] = useState(false)
     const [success, setSuccess] = useState(null)
+    const [acceptedPrivacy, setAcceptedPrivacy] = useState(false)
 
     const navigate = useNavigate()
 
@@ -28,6 +29,10 @@ export const Auth = () => {
     }
 
     const handleRegister = async () => {
+        if (!acceptedPrivacy) {
+            setError("Debes aceptar la política de privacidad para registrarte")
+            return
+        }
         setError(null)
         setLoading(true)
         const data = await register(email, password, username)
@@ -56,7 +61,7 @@ export const Auth = () => {
         }}>
             <div style={{ width: "100%", maxWidth: "400px" }}>
                 <div className="text-center mb-4">
-                    <img src={logo} style={{ width: "120px" }}/>
+                    <img src={logo} style={{ width: "120px" }} />
                     <h1 className="fw-bold mt-2">Jukebox</h1>
                     <p style={{ color: "var(--muted-foreground)" }}>Pide música en segundos</p>
                 </div>
@@ -70,7 +75,7 @@ export const Auth = () => {
                             background: tab === "login" ? "var(--primary)" : "transparent",
                             color: tab === "login" ? "var(--primary-foreground)" : "var(--muted-foreground)"
                         }}
-                        onClick={() => { setTab("login"); setError(null); setSuccess(null) }}
+                        onClick={() => { setTab("login"); setError(null); setSuccess(null); setAcceptedPrivacy(false) }}
                     >
                         Iniciar sesión
                     </button>
@@ -81,7 +86,7 @@ export const Auth = () => {
                             background: tab === "register" ? "var(--primary)" : "transparent",
                             color: tab === "register" ? "var(--primary-foreground)" : "var(--muted-foreground)"
                         }}
-                        onClick={() => { setTab("register"); setError(null); setSuccess(null) }}
+                        onClick={() => { setTab("register"); setError(null); setSuccess(null); setAcceptedPrivacy(false) }}
                     >
                         Registrarse
                     </button>
@@ -129,6 +134,24 @@ export const Auth = () => {
                     {success && (
                         <div style={{ color: "var(--success)", fontSize: "13px", textAlign: "center" }}>
                             <i className="bi bi-check-circle me-1" />{success}
+                        </div>
+                    )}
+
+                    {tab === "register" && (
+                        <div className="d-flex align-items-center gap-2" style={{ fontSize: "13px" }}>
+                            <input
+                                type="checkbox"
+                                id="privacy"
+                                checked={acceptedPrivacy}
+                                onChange={e => setAcceptedPrivacy(e.target.checked)}
+                                style={{ width: "16px", height: "16px", accentColor: "var(--primary)", flexShrink: 0 }}
+                            />
+                            <label htmlFor="privacy" style={{ color: "var(--muted-foreground)", cursor: "pointer" }}>
+                                He leído y acepto la{" "}
+                                <a href="/privacy" target="_blank" style={{ color: "var(--primary)" }}>
+                                    política de privacidad
+                                </a>
+                            </label>
                         </div>
                     )}
 
