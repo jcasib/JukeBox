@@ -152,6 +152,16 @@ def get_role():
         return jsonify({"error": "User not found"}), 404
     return jsonify({"role": user.role.value}), 200
 
+@api.route('/accept-privacy', methods=['PUT'])
+@jwt_required()
+def accept_privacy():
+    user_id = int(get_jwt_identity())
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    user.accepted_privacy = True
+    db.session.commit()
+    return jsonify({"msg": "Privacy accepted"}), 200
 # — Spotify Search ————————————————————————————————————————————————————————
 
 
