@@ -90,7 +90,7 @@ def signup():
     if not re.match(password_regex, password):
         return jsonify({"error": "The password must contain at least one letter and one number"}), 400
 
-    new_user = User(email=email, username=username)
+    new_user = User(email=email, username=username, accepted_privacy=True)
     new_user.set_password(password)
 
     try:
