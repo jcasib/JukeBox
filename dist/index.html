@@ -1,14 +1,22 @@
-<!DOCTYPE html>
-<html class="h-100">
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta charset="UTF-8">
-        <title>Hello Rigo with React + Flux + Context.js</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
-        <link rel="shortcut icon" href="./4geeks.ico"></head>
-    <body class="h-100">
-        <div id="app" class="h-100"></div>
-        <script type="text/javascript" src="./bundle.js"></script>
-    </body>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="icon" href="data:image/png;base64,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" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#ff6b35" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <title>Jukebox</title>
+    <script type="module" crossorigin src="/assets/index-947525aa.js"></script>
+    <link rel="stylesheet" href="/assets/index-602577cf.css">
+  </head>
+  <body>
+    <div id="root"></div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+  </body>
 </html>
