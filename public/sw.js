@@ -35,3 +35,26 @@ self.addEventListener('fetch', event => {
             .catch(() => caches.match(event.request))
     )
 })
+
+self.addEventListener('push', event => {
+    const data = event.data ? event.data.json() : {}
+    const title = data.title || "Jukebox"
+    const body = data.body || "Tienes peticiones pendientes"
+
+    event.waitUntil(
+        self.registration.showNotification(title, {
+            body: body,
+            icon: "/icon-192.png",
+            badge: "/icon-192.png",
+            vibrate: [200, 100, 200],
+            data: { url: "/mod" }
+        })
+    )
+})
+
+self.addEventListener('notificationclick', event => {
+    event.notification.close()
+    event.waitUntil(
+        clients.openWindow(event.notification.data.url || "/mod")
+    )
+})
