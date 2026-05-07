@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import String, Boolean, Enum, DateTime, ForeignKey
+from sqlalchemy import String, Boolean, Enum, DateTime, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 import enum
 from datetime import datetime, timezone
@@ -135,4 +135,21 @@ class RecentlyPlayed(db.Model):
             "artist_name": self.artist_name,
             "album_image": self.album_image,
             "played_at": self.played_at.isoformat()
+        }
+
+class PushSubscription(db.Model):
+    __tablename__ = 'push_subscription'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('user.id'), nullable=False)
+    endpoint: Mapped[str] = mapped_column(Text, nullable=False)
+    p256dh: Mapped[str] = mapped_column(String(250), nullable=False)
+    auth: Mapped[str] = mapped_column(String(250), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "endpoint": self.endpoint,
         }

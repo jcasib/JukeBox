@@ -25,6 +25,7 @@ flask-bcrypt = "*"
 requests = "*"
 apscheduler = "*"
 gevent = "*"
+pywebpush = "*"
 
 [requires]
 python_version = "3.13"

@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint, redirect, stream_with_context, Response
-from api.models import db, User, SongRequest, SongStatus, Roles, SpotifyToken, RecentlyPlayed
+from api.models import db, User, SongRequest, SongStatus, Roles, SpotifyToken, RecentlyPlayed, PushSubscription
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
@@ -16,6 +16,7 @@ import threading
 from api.spotify import get_spotify_token
 from datetime import datetime, timezone, timedelta
 from api.extensions import limiter
+from pywebpush import webpush, WebPushException
 
 # — SSE for requests ———————————————————————————————————————————————————————————————
 _mod_subscribers = []
@@ -61,6 +62,10 @@ FRONTEND_URL = os.getenv("FRONTEND_URL")
 SPOTIFY_AUTH_URL = "https://accounts.spotify.com/authorize"
 SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token"
 SPOTIFY_API_URL = "https://api.spotify.com/v1"
+
+VAPID_PRIVATE_KEY = os.getenv("VAPID_PRIVATE_KEY")
+VAPID_PUBLIC_KEY = os.getenv("VAPID_PUBLIC_KEY")
+VAPID_CLAIMS = {"sub": f"mailto:{os.getenv('VAPID_CLAIMS_EMAIL')}"}
 
 # — Auth ——————————————————————————————————————————————————————————————————
 
@@ -211,6 +216,10 @@ def _create_request_limited(user_id, user):
     db.session.add(song_request)
     db.session.commit()
     notify_moderators(song_request.serialize())
+    # Notificar a moderadores por push
+    mods = User.query.filter(User.role.in_([Roles.MOD, Roles.ADMIN])).all()
+    for mod in mods:
+        send_push_notification(mod.id, "Nueva petición", f"{body.get('track_name')} — {body.get('artist_name')}")
     return jsonify(song_request.serialize()), 201
 
 
@@ -746,3 +755,69 @@ def spotify_status():
         "updated_at": record.updated_at.isoformat(),
         "expires_at": record.expires_at.isoformat() if record.expires_at else None
     })
+
+# — Notifications ——————————————————————————————————————————————————————————————————
+
+@api.route('/push/subscribe', methods=['POST'])
+@jwt_required()
+def push_subscribe():
+    user_id = int(get_jwt_identity())
+    user = db.session.get(User, user_id)
+    if not user or user.role not in (Roles.MOD, Roles.ADMIN):
+        return jsonify({"error": "Access denied"}), 403
+
+    data = request.get_json()
+    endpoint = data.get("endpoint")
+    p256dh = data.get("keys", {}).get("p256dh")
+    auth = data.get("keys", {}).get("auth")
+
+    # Eliminar suscripción anterior si existe
+    existing = PushSubscription.query.filter_by(user_id=user_id).first()
+    if existing:
+        db.session.delete(existing)
+
+    sub = PushSubscription(user_id=user_id, endpoint=endpoint, p256dh=p256dh, auth=auth)
+    db.session.add(sub)
+    db.session.commit()
+    return jsonify({"msg": "Subscribed"}), 201
+
+
+@api.route('/push/unsubscribe', methods=['DELETE'])
+@jwt_required()
+def push_unsubscribe():
+    user_id = int(get_jwt_identity())
+    sub = PushSubscription.query.filter_by(user_id=user_id).first()
+    if sub:
+        db.session.delete(sub)
+        db.session.commit()
+    return jsonify({"msg": "Unsubscribed"}), 200
+
+import time
+_last_push_time = {}
+
+def send_push_notification(user_id, title, body):
+    now = time.time()
+    if now - _last_push_time.get(user_id, 0) < 30:
+        return
+    _last_push_time[user_id] = now
+
+    pending_count = SongRequest.query.filter_by(status=SongStatus.PENDING).count()
+    body = f"Tienes {pending_count} {'canción pendiente' if pending_count == 1 else 'canciones pendientes'} de revisar"
+    title = "Jukebox — Nueva petición"
+
+    subs = PushSubscription.query.filter_by(user_id=user_id).all()
+    for sub in subs:
+        try:
+            webpush(
+                subscription_info={
+                    "endpoint": sub.endpoint,
+                    "keys": {"p256dh": sub.p256dh, "auth": sub.auth}
+                },
+                data=json.dumps({"title": title, "body": body}),
+                vapid_private_key=VAPID_PRIVATE_KEY,
+                vapid_claims=VAPID_CLAIMS
+            )
+        except WebPushException as e:
+            if e.response and e.response.status_code == 410:
+                db.session.delete(sub)
+                db.session.commit()
