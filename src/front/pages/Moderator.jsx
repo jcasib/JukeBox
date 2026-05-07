@@ -10,6 +10,10 @@ export const Moderator = () => {
     const [rejectMessage, setRejectMessage] = useState("")
     const [processingId, setProcessingId] = useState(null)
 
+    const [pushEnabled, setPushEnabled] = useState(false)
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
+    const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY
+
     const { store, dispatch } = useGlobalReducer()
 
     const formatTime = (isoString) => {
@@ -30,6 +34,50 @@ export const Moderator = () => {
         }
     }
 
+    const subscribeToPush = async () => {
+        if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+            alert("Tu navegador no soporta notificaciones push")
+            return
+        }
+
+        const permission = await Notification.requestPermission()
+        if (permission !== "granted") return
+
+        const reg = await navigator.serviceWorker.ready
+        const existing = await reg.pushManager.getSubscription()
+        if (existing) await existing.unsubscribe()
+
+        const sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: VAPID_PUBLIC_KEY
+        })
+
+        const token = localStorage.getItem("token")
+        await fetch(`${BACKEND_URL}/api/push/subscribe`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            body: JSON.stringify(sub.toJSON())
+        })
+
+        setPushEnabled(true)
+        localStorage.setItem("push_enabled", "true")
+    }
+
+    const unsubscribeFromPush = async () => {
+        const reg = await navigator.serviceWorker.ready
+        const sub = await reg.pushManager.getSubscription()
+        if (sub) await sub.unsubscribe()
+
+        const token = localStorage.getItem("token")
+        await fetch(`${BACKEND_URL}/api/push/unsubscribe`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` }
+        })
+
+        setPushEnabled(false)
+        localStorage.removeItem("push_enabled")
+    }
+
     useEffect(() => {
         checkRole()
         const id = setInterval(checkRole, 60000)
@@ -38,6 +86,8 @@ export const Moderator = () => {
 
     useEffect(() => {
         if (!authorized) return
+
+        setPushEnabled(localStorage.getItem("push_enabled") === "true")
 
         const token = localStorage.getItem("token")
 
@@ -116,6 +166,13 @@ export const Moderator = () => {
                 <div>
                     <h1 className="fw-bold mb-0">Nuevas Peticiones</h1>
                     <h6 className="mb-0">Acepta o rechaza las canciones pedidas</h6>
+                    <button
+                        className={`btn btn-sm ${pushEnabled ? "secondary-bottom" : "primary-bottom"}`}
+                        onClick={pushEnabled ? unsubscribeFromPush : subscribeToPush}
+                    >
+                        <i className={`bi ${pushEnabled ? "bi-bell-slash" : "bi-bell"} me-1`} />
+                        {pushEnabled ? "Desactivar notificaciones" : "Activar notificaciones"}
+                    </button>
                 </div>
                 {requests.length > 0 && (
                     <span className="badge-pending">{requests.length} pendientes</span>
