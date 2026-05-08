@@ -94,7 +94,7 @@ export const Requests = () => {
                         </div>
                     )}
 
-                    {accepted.length > 0 && (
+                    {/* {accepted.length > 0 && (
                         <div className="mb-4">
                             <h6 className="fw-bold mb-2">
                                 <i className="bi bi-check-circle me-2" style={{ color: "var(--success)" }} />
@@ -130,7 +130,7 @@ export const Requests = () => {
                                 </div>
                             ))}
                         </div>
-                    )}
+                    )} */}
                 </>
             )}
         </div>
