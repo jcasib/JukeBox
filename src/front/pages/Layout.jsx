@@ -17,7 +17,7 @@ export const Layout = () => {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(r => {
-                if (r.status === 401) {
+                if (r.status === 401 || r.status === 422) {
                     localStorage.removeItem("token")
                     setTokenValid(false)
                     return null
