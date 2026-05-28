@@ -22,6 +22,8 @@ export const Search = () => {
     const [recentlyPlayed, setRecentlyPlayed] = useState([])
     const [alertModal, setAlertModal] = useState(null)
 
+    const [spotifyConfirm, setSpotifyConfirm] = useState(null)
+
     const handleRequest = async (track) => {
         const token = localStorage.getItem("token")
         if (!token) return
@@ -183,18 +185,29 @@ export const Search = () => {
                                     <div id="topSongTrackTitle">{track.name}</div>
                                     <div id="topSongTrackArtist">{track.artists.map(a => a.name).join(", ")}</div>
                                 </div>
-                                <button
-                                    className="btn btn-sm primary-bottom"
-                                    onClick={() => handleRequest(track)}
-                                    disabled={requestingId === track.id || requestedIds.includes(track.id)}
-                                >
-                                    {requestingId === track.id
-                                        ? <div className="spinner-border spinner-border-sm" role="status" />
-                                        : requestedIds.includes(track.id)
-                                            ? <i className="bi bi-check-lg" />
-                                            : <i className="bi bi-plus-lg" />
-                                    }
-                                </button>
+                                <div className="d-flex gap-2 align-items-center">
+                                    {track.external_urls?.spotify && (
+                                        <button
+                                            className="btn btn-sm"
+                                            style={{ color: "var(--muted-foreground)", fontSize: "25px" }}
+                                            onClick={() => setSpotifyConfirm({ url: track.external_urls.spotify, name: track.name })}
+                                        >
+                                            <i className="bi bi-spotify" />
+                                        </button>
+                                    )}
+                                    <button
+                                        className="btn btn-sm primary-bottom"
+                                        onClick={() => handleRequest(track)}
+                                        disabled={requestingId === track.id || requestedIds.includes(track.id)}
+                                    >
+                                        {requestingId === track.id
+                                            ? <div className="spinner-border spinner-border-sm" role="status" />
+                                            : requestedIds.includes(track.id)
+                                                ? <i className="bi bi-check-lg" />
+                                                : <i className="bi bi-plus-lg" />
+                                        }
+                                    </button>
+                                </div>
                             </div>
                         ))
                     )}
@@ -220,18 +233,29 @@ export const Search = () => {
                                 <div id="topSongTrackTitle">{track?.name}</div>
                                 <div id="topSongTrackArtist">{track.artists.map(a => a.name).join(", ")}</div>
                             </div>
-                            <button
-                                className="btn btn-sm primary-bottom"
-                                onClick={() => handleRequest(track)}
-                                disabled={requestingId === track.id || requestedIds.includes(track.id)}
-                            >
-                                {requestingId === track.id
-                                    ? <div className="spinner-border spinner-border-sm" role="status" />
-                                    : requestedIds.includes(track.id)
-                                        ? <i className="bi bi-check-lg" />
-                                        : <i className="bi bi-plus-lg" />
-                                }
-                            </button>
+                            <div className="d-flex gap-2 align-items-center">
+                                {track.external_urls?.spotify && (
+                                    <button
+                                        className="btn btn-sm"
+                                        style={{ color: "var(--muted-foreground)", fontSize: "25px" }}
+                                        onClick={() => setSpotifyConfirm({ url: track.external_urls.spotify, name: track.name })}
+                                    >
+                                        <i className="bi bi-spotify" />
+                                    </button>
+                                )}
+                                <button
+                                    className="btn btn-sm primary-bottom"
+                                    onClick={() => handleRequest(track)}
+                                    disabled={requestingId === track.id || requestedIds.includes(track.id)}
+                                >
+                                    {requestingId === track.id
+                                        ? <div className="spinner-border spinner-border-sm" role="status" />
+                                        : requestedIds.includes(track.id)
+                                            ? <i className="bi bi-check-lg" />
+                                            : <i className="bi bi-plus-lg" />
+                                    }
+                                </button>
+                            </div>
                         </div>
                     ))
                 )}
@@ -259,6 +283,39 @@ export const Search = () => {
                     </div>
                 )}
             </div>
+            {spotifyConfirm && (
+                <div style={{
+                    position: "fixed", inset: 0, background: "#00000099",
+                    display: "flex", alignItems: "flex-end", zIndex: 1000, marginBlockEnd: 65
+                }}>
+                    <div style={{
+                        background: "var(--secondary)", borderRadius: "16px 16px 0 0",
+                        padding: "24px", width: "100%"
+                    }}>
+                        <div className="text-center mb-3">
+                            <i className="bi bi-spotify fs-1" style={{ color: "var(--muted-foreground)" }} />
+                            <p className="fw-bold mt-2 mb-0">¿Abrir <span style={{ color: "var(--primary)", fontStyle: "italic" }}>{spotifyConfirm?.name}</span> en Spotify?</p>
+                            <p style={{ fontSize: "13px", color: "var(--muted-foreground)" }}>
+                                Estás siendo redirigido a Spotify para escuchar la canción.
+                            </p>
+                        </div>
+                        <div className="d-flex gap-2">
+                            <button
+                                className="btn secondary-bottom flex-fill"
+                                onClick={() => setSpotifyConfirm(null)}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                className="btn primary-bottom flex-fill"
+                                onClick={() => { window.open(spotifyConfirm.url, "_blank"); setSpotifyConfirm(null) }}
+                            >
+                                Abrir Spotify
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             {/* Modal de alerta */}
             {alertModal && (
                 <div style={{
