@@ -9,14 +9,24 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
 export const Layout = () => {
     const token = localStorage.getItem("token")
     const [showPrivacyModal, setShowPrivacyModal] = useState(false)
+    const [tokenValid, setTokenValid] = useState(null)
 
     useEffect(() => {
         if (!token) return
         fetch(`${BACKEND_URL}/api/get_user`, {
             headers: { Authorization: `Bearer ${token}` }
         })
-            .then(r => r.json())
+            .then(r => {
+                if (r.status === 401) {
+                    localStorage.removeItem("token")
+                    setTokenValid(false)
+                    return null
+                }
+                return r.json()
+            })
             .then(user => {
+                if (!user) return
+                setTokenValid(true)
                 if (!user.accepted_privacy) setShowPrivacyModal(true)
             })
     }, [])
@@ -29,7 +39,12 @@ export const Layout = () => {
         setShowPrivacyModal(false)
     }
 
-    if (!token) return <Navigate to="/auth" replace />
+    if (!token || tokenValid === false) return <Navigate to="/auth" replace />
+    if (tokenValid === null && token) return (
+        <div className="d-flex justify-content-center align-items-center" style={{ height: "100vh" }}>
+            <div className="spinner-border" style={{ color: "var(--primary)" }} role="status" />
+        </div>
+    )
 
     return (
         <ScrollToTop>
