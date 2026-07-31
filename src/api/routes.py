@@ -198,10 +198,19 @@ def create_request():
             "muted_until": user.muted_until.isoformat()
         }), 403
 
-    # Aplicar rate limit
+    # Rate limit manual por usuario
+    fifteen_min_ago = datetime.now(timezone.utc) - timedelta(minutes=15)
+    recent_count = SongRequest.query.filter(
+        SongRequest.user_id == user_id,
+        SongRequest.created_at >= fifteen_min_ago
+    ).count()
+
+    if recent_count >= 5:
+        return jsonify({"error": "rate_limit"}), 429
+
     return _create_request_limited(user_id, user)
 
-@limiter.limit("20 per hour")
+
 def _create_request_limited(user_id, user):
     body = request.get_json() or {}
     song_request = SongRequest(
@@ -216,12 +225,10 @@ def _create_request_limited(user_id, user):
     db.session.add(song_request)
     db.session.commit()
     notify_moderators(song_request.serialize())
-    # Notificar a moderadores por push
     mods = User.query.filter(User.role.in_([Roles.MOD, Roles.ADMIN])).all()
     for mod in mods:
         send_push_notification(mod.id, "Nueva petición", f"{body.get('track_name')} — {body.get('artist_name')}")
     return jsonify(song_request.serialize()), 201
-
 
 @api.route('/requests/my', methods=['GET'])
 @jwt_required()
